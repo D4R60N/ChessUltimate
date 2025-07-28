@@ -1,0 +1,77 @@
+package palecek;
+
+import palecek.utils.Orientation;
+import palecek.utils.Separators;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class GameState {
+    private int playerOnTurn;
+    private int numberOfPlayers; // Assuming a two-player game
+    private Board board;
+    private RuleResolver ruleResolver;
+    private List<Player> players;
+
+    public GameState(int playerOnTurn, int numberOfPlayers, Board board, RuleResolver ruleResolver) {
+        this.playerOnTurn = playerOnTurn;
+        this.numberOfPlayers = numberOfPlayers;
+        this.board = board;
+        this.ruleResolver = ruleResolver;
+        if (numberOfPlayers <= 0) {
+            throw new IllegalArgumentException("Number of players must be greater than 0");
+        }
+        if (board == null) {
+            throw new IllegalArgumentException("Board cannot be null");
+        }
+        if (ruleResolver == null) {
+            throw new IllegalArgumentException("RuleResolver cannot be null");
+        }
+        if (playerOnTurn < 0 || playerOnTurn >= numberOfPlayers) {
+            throw new IllegalArgumentException("Invalid player index");
+        }
+        this.players = new ArrayList<>(numberOfPlayers);
+        for(int i = 0; i < numberOfPlayers; i++) {
+            players.add(new Player(Orientation.fromValue(i % Orientation.values().length)));
+        }
+    }
+
+    public int getPlayerOnTurn() {
+        return playerOnTurn;
+    }
+
+    public void setPlayerOnTurn(int playerOnTurn) {
+        this.playerOnTurn = playerOnTurn;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public Player getPlayer() {
+        if (playerOnTurn < 0 || playerOnTurn >= players.size()) {
+            throw new IllegalArgumentException("Invalid player index");
+        }
+        return players.get(playerOnTurn);
+    }
+
+    public void makeMove(String move) {
+        String[] split = move.split(Separators.SPACE_SEPARATOR);
+        if (split.length != 2) {
+            throw new IllegalArgumentException("Invalid move format");
+        }
+        Position from = new Position(split[0]);
+        Position to = new Position(split[1]);
+        if(ruleResolver.resolveMove(from, to, this)) {
+            playerOnTurn = ((playerOnTurn+1) % numberOfPlayers);
+        }
+    }
+}

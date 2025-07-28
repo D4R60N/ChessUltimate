@@ -1,0 +1,13 @@
+{
+  "piece": "pawn",
+
+  "move": "2.3:b,2.3:r+,2.3:l+",
+  "moveCondition": "1:f,1:l|1:r,1:f o",
+
+  "canCapture": true,
+  "captureCondition": "",
+
+  "hasAction": false,
+  "action": "",
+  "actionCondition": ""
+}
