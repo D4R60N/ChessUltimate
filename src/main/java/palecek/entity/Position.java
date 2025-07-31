@@ -1,4 +1,4 @@
-package palecek;
+package palecek.entity;
 
 import palecek.utils.Orientation;
 import palecek.utils.Separators;

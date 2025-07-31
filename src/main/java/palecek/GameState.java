@@ -1,5 +1,7 @@
 package palecek;
 
+import palecek.entity.Board;
+import palecek.entity.Position;
 import palecek.utils.Orientation;
 import palecek.utils.Separators;
 

@@ -1,4 +1,4 @@
-package palecek;
+package palecek.move;
 
 import palecek.utils.Direction;
 

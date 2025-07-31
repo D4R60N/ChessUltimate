@@ -1,6 +1,4 @@
-package palecek;
-
-import java.lang.reflect.Type;
+package palecek.entity;
 
 public class Piece {
     private String type;

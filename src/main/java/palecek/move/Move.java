@@ -1,6 +1,4 @@
-package palecek;
-
-import palecek.utils.Orientation;
+package palecek.move;
 
 import java.util.ArrayList;
 import java.util.List;

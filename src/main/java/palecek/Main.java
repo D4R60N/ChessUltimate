@@ -1,10 +1,10 @@
 package palecek;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import palecek.entity.Board;
+import palecek.entity.Rule;
 import palecek.utils.CSVReader;
 
-import java.awt.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 

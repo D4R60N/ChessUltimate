@@ -56,5 +56,12 @@ public enum Direction {
     public boolean isNegative() {
         return this == BACKWARD || this == RIGHT;
     }
+
+    public boolean isInLine(Direction other) {
+        return (this == FORWARD && other == BACKWARD) ||
+               (this == BACKWARD && other == FORWARD) ||
+               (this == LEFT && other == RIGHT) ||
+               (this == RIGHT && other == LEFT);
+    }
 }
 

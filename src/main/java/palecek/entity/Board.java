@@ -1,4 +1,4 @@
-package palecek;
+package palecek.entity;
 
 public class Board {
     private final int width;

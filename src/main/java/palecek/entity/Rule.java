@@ -1,18 +1,19 @@
-package palecek;
+package palecek.entity;
 
-import palecek.utils.Direction;
-import palecek.utils.Operators;
-import palecek.utils.Orientation;
-import palecek.utils.Separators;
+import palecek.move.Move;
+import palecek.move.MoveComponent;
+import palecek.move.SpecialMove;
+import palecek.move.SpecialMoveComponent;
+import palecek.utils.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Rule {
     private String piece;
     private List<Move> move;
+    private List<SpecialMove> specialMove;
     private String moveCondition;
     private boolean canCapture;
     private String captureCondition;
@@ -32,25 +33,44 @@ public class Rule {
     }
 
     public void setMove(String move) {
-        this.move = parseMove(move);
+        this.move = new ArrayList<>();
+        this.specialMove = new ArrayList<>();
+        parseMove(move, this.move, this.specialMove);
+        System.out.println("Parsed moves: " + this.move);
     }
 
-    private List<Move> parseMove(String move) {
-        List<Move> moves = new ArrayList<>();
-        String[] moveComponents = move.split(Separators.OR_SEPARATOR);
+    private boolean containsSpecialChar(String component) {
+        return component.charAt(0) == 'F' ||
+                component.charAt(0) == 'R';
+    }
+
+    private void parseMove(String move, List<Move> moves, List<SpecialMove> specialMoves) {
+        String[] moveComponents = move.split(Separators.SLASH_SEPARATOR);
         for (String component : moveComponents) {
-            String[] m = component.split(Separators.DIMENSION_SEPARATOR);
-            if (m.length > 4) {
-                throw new IllegalArgumentException("Invalid move format: " + component);
+            if (component.isEmpty()) {
+                continue;
             }
-            Move newMove = new Move();
-            for (String s : m) {
-                String[] parts = s.split(Separators.DIRECTION_SEPARATOR);
-                if (parts.length == 2) {
-                    String direction = parts[1].trim();
-                    String[] distanceParts = parts[0].split(Separators.INNER_SEPARATOR);
-                    int distance = Integer.parseInt(distanceParts[0].trim());
-                    int to = distance;
+            // Check if the component contains special characters indicating a special move
+            if (containsSpecialChar(component)) {
+                String[] m = component.split(Separators.DIRECTION_SEPARATOR);
+                if (m.length > 3) {
+                    throw new IllegalArgumentException("Invalid move format: " + component);
+                }
+                String query = m[0];
+                int offset = m.length > 1 ? Integer.parseInt(m[1].trim()) : 0;
+
+                SpecialMoveComponent specialMoveComponent = null;
+
+                // Check if the special move has limitations
+                if (m.length > 2) {
+                    SpecialMovePosition position = SpecialMovePosition.fromString(m[2].substring(0,1));
+                    String withoutPosition = m[2].substring(1);
+                    if (withoutPosition.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid special move format: " + component);
+                    }
+                    String[] distanceParts = withoutPosition.split(Separators.INNER_SEPARATOR);
+                    int from = Integer.parseInt(distanceParts[0].trim());
+                    int to = from;
                     if (distanceParts.length == 2) {
                         if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
                             to = Integer.MAX_VALUE;
@@ -58,27 +78,56 @@ public class Rule {
                             to = Integer.parseInt(distanceParts[1].trim());
                         }
 
-                        if (to < distance) {
-                            throw new IllegalArgumentException("Invalid distance: " + distance + " is greater than " + to);
+                        if (to < from) {
+                            throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
                         }
-                    } else if (distanceParts.length > 2) {
-                        throw new IllegalArgumentException("Invalid distance format: " + s);
                     }
-                    newMove.addMoveComponent(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), distance, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0)));
-                } else {
-                    throw new IllegalArgumentException("Invalid move format: " + s);
+                    specialMoveComponent = new SpecialMoveComponent(position, from, to);
                 }
+
+                specialMoves.add(SpecialMove.getFromString(query, offset, specialMoveComponent));
+            } else {
+                String[] m = component.split(Separators.DIMENSION_SEPARATOR);
+                if (m.length > 2) {
+                    throw new IllegalArgumentException("Invalid move format: " + component);
+                }
+                Move newMove = new Move();
+                for (String s : m) {
+                    String[] parts = s.split(Separators.DIRECTION_SEPARATOR);
+                    if (parts.length == 2) {
+                        String direction = parts[1].trim();
+                        String[] distanceParts = parts[0].split(Separators.INNER_SEPARATOR);
+                        int from = Integer.parseInt(distanceParts[0].trim());
+                        int to = from;
+                        if (distanceParts.length == 2) {
+                            if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
+                                to = Integer.MAX_VALUE;
+                            } else {
+                                to = Integer.parseInt(distanceParts[1].trim());
+                            }
+
+                            if (to < from) {
+                                throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
+                            }
+                        } else if (distanceParts.length > 2) {
+                            throw new IllegalArgumentException("Invalid distance format: " + s);
+                        }
+                        newMove.addMoveComponent(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0)));
+                    } else {
+                        throw new IllegalArgumentException("Invalid move format: " + s);
+                    }
+                }
+                completeMove(newMove);
+                moves.add(newMove);
             }
-            // Trim moves to remove unnecessary components
-            trimMoves(newMove.getMoveComponents());
-            completeMove(newMove);
-            moves.add(newMove);
         }
-        return moves;
     }
 
     private void completeMove(Move move) {
         List<MoveComponent> components = move.getMoveComponents();
+        if (components.getFirst().getDirection().isInLine(components.get(1).getDirection())) {
+            throw new IllegalArgumentException("Invalid move format (Directions are in line): " + move);
+        }
         if (components.size() == 1) {
             MoveComponent component = components.getFirst();
             if (component.getDirection() == Direction.FORWARD) {
@@ -91,31 +140,31 @@ public class Rule {
                 components.add(new MoveComponent(Direction.BACKWARD, 0, 0));
             }
 
-        } else if (components.size() == 3) {
-            boolean hasForward = false, hasBackward = false, hasLeft = false, hasRight = false;
-            for (MoveComponent component : components) {
-                if (component.getDirection() == Direction.FORWARD) {
-                    hasForward = true;
-                } else if (component.getDirection() == Direction.BACKWARD) {
-                    hasBackward = true;
-                } else if (component.getDirection() == Direction.LEFT) {
-                    hasLeft = true;
-                } else if (component.getDirection() == Direction.RIGHT) {
-                    hasRight = true;
-                }
-            }
-            if (!hasForward) {
-                components.add(new MoveComponent(Direction.FORWARD, 0, 0));
-            }
-            if (!hasBackward) {
-                components.add(new MoveComponent(Direction.BACKWARD, 0, 0));
-            }
-            if (!hasLeft) {
-                components.add(new MoveComponent(Direction.LEFT, 0, 0));
-            }
-            if (!hasRight) {
-                components.add(new MoveComponent(Direction.RIGHT, 0, 0));
-            }
+//        } else if (components.size() == 3) {
+//            boolean hasForward = false, hasBackward = false, hasLeft = false, hasRight = false;
+//            for (MoveComponent component : components) {
+//                if (component.getDirection() == Direction.FORWARD) {
+//                    hasForward = true;
+//                } else if (component.getDirection() == Direction.BACKWARD) {
+//                    hasBackward = true;
+//                } else if (component.getDirection() == Direction.LEFT) {
+//                    hasLeft = true;
+//                } else if (component.getDirection() == Direction.RIGHT) {
+//                    hasRight = true;
+//                }
+//            }
+//            if (!hasForward) {
+//                components.add(new MoveComponent(Direction.FORWARD, 0, 0));
+//            }
+//            if (!hasBackward) {
+//                components.add(new MoveComponent(Direction.BACKWARD, 0, 0));
+//            }
+//            if (!hasLeft) {
+//                components.add(new MoveComponent(Direction.LEFT, 0, 0));
+//            }
+//            if (!hasRight) {
+//                components.add(new MoveComponent(Direction.RIGHT, 0, 0));
+//            }
         }
     }
 
@@ -202,6 +251,10 @@ public class Rule {
             }
         }
 
+        for (SpecialMove specialMove : this.specialMove) {
+
+        }
+
         return false;
     }
 
@@ -216,7 +269,46 @@ public class Rule {
         return true;
     }
 
+    private List<Position> calculateExpectedPositions(List<SpecialMove> specialMoves, Orientation orientation, Board board) {
+        List<Position> expectedPositions = new ArrayList<>();
 
+        for (SpecialMove specialMove : specialMoves) {
+            int offset = 0;
+            if (specialMove.isRank()) {
+                switch (specialMove.getPosition()) {
+                    case FIRST -> offset = 0;
+                    case CENTER -> offset = (board.getWidth()-1)/2;
+                    case LAST -> offset = board.getWidth() - 1;
+                }
+            } else {
+                switch (specialMove.getPosition()) {
+                    case FIRST -> offset = 0;
+                    case CENTER -> offset = (board.getHeight()-1)/2;
+                    case LAST -> offset = board.getHeight() - 1;
+                }
+            }
+            if (specialMove.getSpecialMoveComponent() == null) {
+                if (specialMove.isRank()) {
+                    for (int i = 0; i < board.getWidth(); i++) {
+                        expectedPositions.add(new Position(i, offset));
+                    }
+                } else {
+                    for (int i = 0; i < board.getHeight(); i++) {
+                        expectedPositions.add(new Position(offset, i));
+                    }
+                }
+            } else  {
+                SpecialMoveComponent component = specialMove.getSpecialMoveComponent();
+                int from = component.getFrom();
+                int to = component.getTo();
+                //todo
+            }
+        }
+
+        return expectedPositions;
+    }
+
+    // Calculates the expected positions based on the move components.
     private List<Position> calculateExpectedPositions(Position from, List<MoveComponent> move, Orientation orientation, Board board) {
         List<Position> expectedPositions = new ArrayList<>();
 
@@ -273,12 +365,12 @@ public class Rule {
                 Position position = new Position(x, y);
                 if (line1.isRepeting() || line2.isRepeting()) {
                     if (direction1.isVertical()) {
-                        int modulo1 = line2.isRepeting() ? line2.getTo() : maxX+1;
-                        int modulo2 = line1.isRepeting() ? line1.getTo() : maxY+1;
+                        int modulo1 = line2.isRepeting() ? line2.getTo() : maxX + 1;
+                        int modulo2 = line1.isRepeting() ? line1.getTo() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction2, direction1);
                     } else {
-                        int modulo1 = line1.isRepeting() ? line1.getTo() : maxX+1;
-                        int modulo2 = line2.isRepeting() ? line2.getTo() : maxY+1;
+                        int modulo1 = line1.isRepeting() ? line1.getTo() : maxX + 1;
+                        int modulo2 = line2.isRepeting() ? line2.getTo() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction1, direction2);
                     }
 
@@ -331,28 +423,28 @@ public class Rule {
         }
 
     }
-
-    private void trimMoves(List<MoveComponent> moveComponents) {
-        LinkedList<MoveComponent> trimmedComponents = new LinkedList<>();
-        for (int i = 0; i < moveComponents.size(); i++) {
-            MoveComponent line1 = moveComponents.get(i);
-            for (int j = i + 1; j < moveComponents.size(); j++) {
-                MoveComponent line2 = moveComponents.get(j);
-                // Check if the moveComponents are in opposite directions
-                if (line1.getDirection().isOpposite(line2.getDirection())) {
-                    // Check if the moveComponents overlap
-                    if (line1.getFrom() == line2.getFrom()) {
-                        // Check if the second line is remains a line after trimming
-                        if (line2.getFrom() == line2.getTo()) {
-                            trimmedComponents.add(line2);
-                        } else {
-                            line2.setFrom(line2.getFrom() + 1);
-                        }
-                    }
-                }
-            }
-        }
-        // Remove moveComponents that are completely contained in other moveComponents
-        moveComponents.removeAll(trimmedComponents);
-    }
+//
+//    private void trimMoves(List<MoveComponent> moveComponents) {
+//        LinkedList<MoveComponent> trimmedComponents = new LinkedList<>();
+//        for (int i = 0; i < moveComponents.size(); i++) {
+//            MoveComponent line1 = moveComponents.get(i);
+//            for (int j = i + 1; j < moveComponents.size(); j++) {
+//                MoveComponent line2 = moveComponents.get(j);
+//                // Check if the moveComponents are in opposite directions
+//                if (line1.getDirection().isOpposite(line2.getDirection())) {
+//                    // Check if the moveComponents overlap
+//                    if (line1.getFrom() == line2.getFrom()) {
+//                        // Check if the second line is remains a line after trimming
+//                        if (line2.getFrom() == line2.getTo()) {
+//                            trimmedComponents.add(line2);
+//                        } else {
+//                            line2.setFrom(line2.getFrom() + 1);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        // Remove moveComponents that are completely contained in other moveComponents
+//        moveComponents.removeAll(trimmedComponents);
+//    }
 }

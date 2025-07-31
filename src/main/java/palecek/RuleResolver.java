@@ -1,6 +1,8 @@
 package palecek;
 
-import palecek.utils.Orientation;
+import palecek.entity.Board;
+import palecek.entity.Position;
+import palecek.entity.Rule;
 import palecek.utils.Separators;
 
 import java.util.List;
