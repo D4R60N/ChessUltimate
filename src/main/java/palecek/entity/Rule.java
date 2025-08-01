@@ -1,19 +1,24 @@
 package palecek.entity;
 
-import palecek.move.Move;
+import palecek.move.MoveNode;
 import palecek.move.MoveComponent;
-import palecek.move.SpecialMove;
+import palecek.move.SpecialMoveNode;
 import palecek.move.SpecialMoveComponent;
 import palecek.utils.*;
+import palecek.utils.booleantree.BooleanTree;
+import palecek.utils.token.Parser;
+import palecek.utils.token.Tokenizer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Rule {
     private String piece;
-    private List<Move> move;
-    private List<SpecialMove> specialMove;
+//    private List<Move> move;
+//    private List<SpecialMove> specialMove;
+    private BooleanTree move;
     private String moveCondition;
     private boolean canCapture;
     private String captureCondition;
@@ -21,8 +26,7 @@ public class Rule {
     private String action;
     private String actionCondition;
 
-    // Getters and Setters
-
+    public static Tokenizer tokenizer = new Tokenizer();
 
     public String getPiece() {
         return piece;
@@ -33,139 +37,9 @@ public class Rule {
     }
 
     public void setMove(String move) {
-        this.move = new ArrayList<>();
-        this.specialMove = new ArrayList<>();
-        parseMove(move, this.move, this.specialMove);
-        System.out.println("Parsed moves: " + this.move);
-    }
-
-    private boolean containsSpecialChar(String component) {
-        return component.charAt(0) == 'F' ||
-                component.charAt(0) == 'R';
-    }
-
-    private void parseMove(String move, List<Move> moves, List<SpecialMove> specialMoves) {
-        String[] moveComponents = move.split(Separators.SLASH_SEPARATOR);
-        for (String component : moveComponents) {
-            if (component.isEmpty()) {
-                continue;
-            }
-            // Check if the component contains special characters indicating a special move
-            if (containsSpecialChar(component)) {
-                String[] m = component.split(Separators.DIRECTION_SEPARATOR);
-                if (m.length > 3) {
-                    throw new IllegalArgumentException("Invalid move format: " + component);
-                }
-                String query = m[0];
-                int offset = m.length > 1 ? Integer.parseInt(m[1].trim()) : 0;
-
-                SpecialMoveComponent specialMoveComponent = null;
-
-                // Check if the special move has limitations
-                if (m.length > 2) {
-                    SpecialMovePosition position = SpecialMovePosition.fromString(m[2].substring(0,1));
-                    String withoutPosition = m[2].substring(1);
-                    if (withoutPosition.isEmpty()) {
-                        throw new IllegalArgumentException("Invalid special move format: " + component);
-                    }
-                    String[] distanceParts = withoutPosition.split(Separators.INNER_SEPARATOR);
-                    int from = Integer.parseInt(distanceParts[0].trim());
-                    int to = from;
-                    if (distanceParts.length == 2) {
-                        if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
-                            to = Integer.MAX_VALUE;
-                        } else {
-                            to = Integer.parseInt(distanceParts[1].trim());
-                        }
-
-                        if (to < from) {
-                            throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
-                        }
-                    }
-                    specialMoveComponent = new SpecialMoveComponent(position, from, to);
-                }
-
-                specialMoves.add(SpecialMove.getFromString(query, offset, specialMoveComponent));
-            } else {
-                String[] m = component.split(Separators.DIMENSION_SEPARATOR);
-                if (m.length > 2) {
-                    throw new IllegalArgumentException("Invalid move format: " + component);
-                }
-                Move newMove = new Move();
-                for (String s : m) {
-                    String[] parts = s.split(Separators.DIRECTION_SEPARATOR);
-                    if (parts.length == 2) {
-                        String direction = parts[1].trim();
-                        String[] distanceParts = parts[0].split(Separators.INNER_SEPARATOR);
-                        int from = Integer.parseInt(distanceParts[0].trim());
-                        int to = from;
-                        if (distanceParts.length == 2) {
-                            if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
-                                to = Integer.MAX_VALUE;
-                            } else {
-                                to = Integer.parseInt(distanceParts[1].trim());
-                            }
-
-                            if (to < from) {
-                                throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
-                            }
-                        } else if (distanceParts.length > 2) {
-                            throw new IllegalArgumentException("Invalid distance format: " + s);
-                        }
-                        newMove.addMoveComponent(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0)));
-                    } else {
-                        throw new IllegalArgumentException("Invalid move format: " + s);
-                    }
-                }
-                completeMove(newMove);
-                moves.add(newMove);
-            }
-        }
-    }
-
-    private void completeMove(Move move) {
-        List<MoveComponent> components = move.getMoveComponents();
-        if (components.getFirst().getDirection().isInLine(components.get(1).getDirection())) {
-            throw new IllegalArgumentException("Invalid move format (Directions are in line): " + move);
-        }
-        if (components.size() == 1) {
-            MoveComponent component = components.getFirst();
-            if (component.getDirection() == Direction.FORWARD) {
-                components.add(new MoveComponent(Direction.LEFT, 0, 0));
-            } else if (component.getDirection() == Direction.BACKWARD) {
-                components.add(new MoveComponent(Direction.RIGHT, 0, 0));
-            } else if (component.getDirection() == Direction.LEFT) {
-                components.add(new MoveComponent(Direction.FORWARD, 0, 0));
-            } else if (component.getDirection() == Direction.RIGHT) {
-                components.add(new MoveComponent(Direction.BACKWARD, 0, 0));
-            }
-
-//        } else if (components.size() == 3) {
-//            boolean hasForward = false, hasBackward = false, hasLeft = false, hasRight = false;
-//            for (MoveComponent component : components) {
-//                if (component.getDirection() == Direction.FORWARD) {
-//                    hasForward = true;
-//                } else if (component.getDirection() == Direction.BACKWARD) {
-//                    hasBackward = true;
-//                } else if (component.getDirection() == Direction.LEFT) {
-//                    hasLeft = true;
-//                } else if (component.getDirection() == Direction.RIGHT) {
-//                    hasRight = true;
-//                }
-//            }
-//            if (!hasForward) {
-//                components.add(new MoveComponent(Direction.FORWARD, 0, 0));
-//            }
-//            if (!hasBackward) {
-//                components.add(new MoveComponent(Direction.BACKWARD, 0, 0));
-//            }
-//            if (!hasLeft) {
-//                components.add(new MoveComponent(Direction.LEFT, 0, 0));
-//            }
-//            if (!hasRight) {
-//                components.add(new MoveComponent(Direction.RIGHT, 0, 0));
-//            }
-        }
+        Parser parser = new Parser(tokenizer.tokenize(move));
+        this.move = move.isEmpty() ? null : new BooleanTree(parser.parseExpression());
+        System.out.println("a");
     }
 
     public String getMoveCondition() {
@@ -235,27 +109,15 @@ public class Rule {
             if (!from.equals(to)) {
                 return false;
             }
+            return true; // No move defined, so the piece can stay in place
         }
-        for (Move move : this.move) {
-            if (move == null || move.getMoveComponents() == null || move.getMoveComponents().isEmpty()) {
-                continue;
-            }
-            List<Position> expectedPositions = calculateExpectedPositions(from, move.getMoveComponents(), orientation, board);
-
-            for (Position expectedPosition : expectedPositions) {
-                board.setFromPosition(expectedPosition, "lul");
-            }
-
-            if (expectedPositions.contains(to)) {
-                return true;
-            }
-        }
-
-        for (SpecialMove specialMove : this.specialMove) {
-
-        }
-
-        return false;
+        Map<String, Object> context = Map.of(
+                "from", from,
+                "to", to,
+                "orientation", orientation,
+                "board", board
+        );
+        return move.evaluate(context);
     }
 
     public boolean canMove(Position from, Position to) {
@@ -269,160 +131,10 @@ public class Rule {
         return true;
     }
 
-    private List<Position> calculateExpectedPositions(List<SpecialMove> specialMoves, Orientation orientation, Board board) {
-        List<Position> expectedPositions = new ArrayList<>();
 
-        for (SpecialMove specialMove : specialMoves) {
-            int offset = 0;
-            if (specialMove.isRank()) {
-                switch (specialMove.getPosition()) {
-                    case FIRST -> offset = 0;
-                    case CENTER -> offset = (board.getWidth()-1)/2;
-                    case LAST -> offset = board.getWidth() - 1;
-                }
-            } else {
-                switch (specialMove.getPosition()) {
-                    case FIRST -> offset = 0;
-                    case CENTER -> offset = (board.getHeight()-1)/2;
-                    case LAST -> offset = board.getHeight() - 1;
-                }
-            }
-            if (specialMove.getSpecialMoveComponent() == null) {
-                if (specialMove.isRank()) {
-                    for (int i = 0; i < board.getWidth(); i++) {
-                        expectedPositions.add(new Position(i, offset));
-                    }
-                } else {
-                    for (int i = 0; i < board.getHeight(); i++) {
-                        expectedPositions.add(new Position(offset, i));
-                    }
-                }
-            } else  {
-                SpecialMoveComponent component = specialMove.getSpecialMoveComponent();
-                int from = component.getFrom();
-                int to = component.getTo();
-                //todo
-            }
-        }
-
-        return expectedPositions;
-    }
 
     // Calculates the expected positions based on the move components.
-    private List<Position> calculateExpectedPositions(Position from, List<MoveComponent> move, Orientation orientation, Board board) {
-        List<Position> expectedPositions = new ArrayList<>();
 
-        for (int i = 0; i < move.size(); i++) {
-            MoveComponent line1 = move.get(i);
-            for (int j = i + 1; j < move.size(); j++) {
-                MoveComponent line2 = move.get(j);
-                if (line1.getDirection().isOpposite(line2.getDirection())) {
-                    continue;
-                }
-                fillPositions(expectedPositions, line1, line2, from, orientation, board);
-            }
-        }
-
-        return expectedPositions;
-    }
-
-    private void fillPositions(List<Position> positions, MoveComponent line1, MoveComponent line2, Position from, Orientation orientation, Board board) {
-        int maxX = board.getWidth() - 1;
-        int maxY = board.getHeight() - 1;
-        Direction direction1 = line1.getDirection().getDirectionFromOrientation(orientation);
-        Direction direction2 = line2.getDirection().getDirectionFromOrientation(orientation);
-        for (int i = line1.getFrom(); i <= Math.min(line1.getTo(), line1.getDirection().isVertical() ? maxY : maxX); i++) {
-            for (int j = line2.getFrom(); j <= Math.min(line2.getTo(), line2.getDirection().isVertical() ? maxY : maxX); j++) {
-                int x = from.getX(), y = from.getY();
-                switch (direction1) {
-                    case FORWARD:
-                        y += i;
-                        break;
-                    case BACKWARD:
-                        y -= i;
-                        break;
-                    case LEFT:
-                        x += i;
-                        break;
-                    case RIGHT:
-                        x -= i;
-                        break;
-                }
-                switch (direction2) {
-                    case FORWARD:
-                        y += j;
-                        break;
-                    case BACKWARD:
-                        y -= j;
-                        break;
-                    case LEFT:
-                        x += j;
-                        break;
-                    case RIGHT:
-                        x -= j;
-                        break;
-                }
-                Position position = new Position(x, y);
-                if (line1.isRepeting() || line2.isRepeting()) {
-                    if (direction1.isVertical()) {
-                        int modulo1 = line2.isRepeting() ? line2.getTo() : maxX + 1;
-                        int modulo2 = line1.isRepeting() ? line1.getTo() : maxY + 1;
-                        repete(position, modulo1, modulo2, positions, maxX, maxY, direction2, direction1);
-                    } else {
-                        int modulo1 = line1.isRepeting() ? line1.getTo() : maxX + 1;
-                        int modulo2 = line2.isRepeting() ? line2.getTo() : maxY + 1;
-                        repete(position, modulo1, modulo2, positions, maxX, maxY, direction1, direction2);
-                    }
-
-                } else {
-                    positions.add(position);
-                }
-            }
-        }
-    }
-
-    /**
-     * Repeats the position in a grid-like manner based on the modulo values.
-     *
-     * @param pos        The starting position.
-     * @param modulo1    The step size for the first direction.
-     * @param modulo2    The step size for the second direction.
-     * @param positions  The list to add the repeated positions to.
-     * @param maxX       The maximum x-coordinate of the grid.
-     * @param maxY       The maximum y-coordinate of the grid.
-     * @param direction1 The direction for the first axis (horizontal).
-     * @param direction2 The direction for the second axis (vertical).
-     */
-    private void repete(Position pos, int modulo1, int modulo2, List<Position> positions, int maxX, int maxY, Direction direction1, Direction direction2) {
-        int x = pos.getX();
-        int y = pos.getY();
-        if (direction1.isNegative() && direction2.isNegative()) {
-            for (int i = x; i >= 0; i -= modulo1) {
-                for (int j = y; j >= 0; j -= modulo2) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        } else if (direction1.isNegative()) {
-            for (int i = x; i >= 0; i -= modulo1) {
-                for (int j = y; j <= maxY; j += modulo2) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        } else if (direction2.isNegative()) {
-            for (int i = x; i <= maxX; i += modulo1) {
-                for (int j = y; j >= 0; j -= modulo2) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        } else {
-            for (int i = x; i <= maxX; i += modulo1) {
-                for (int j = y; j <= maxY; j += modulo2) {
-                    positions.add(new Position(i, j));
-                }
-            }
-        }
-
-    }
 //
 //    private void trimMoves(List<MoveComponent> moveComponents) {
 //        LinkedList<MoveComponent> trimmedComponents = new LinkedList<>();

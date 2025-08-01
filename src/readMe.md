@@ -1,4 +1,4 @@
-# moves
+# moveNodes
 f - forward
 b - backward
 l - left

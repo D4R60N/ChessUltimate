@@ -15,4 +15,19 @@ public enum SpecialMovePosition {
                 throw new IllegalArgumentException("Unknown special move position: " + position);
         }
     }
+
+    public SpecialMovePosition rotate(Orientation orientation) {
+        switch (orientation) {
+            case NORTH, EAST:
+                return this;
+            case SOUTH, WEST:
+                return switch (this) {
+                    case FIRST -> LAST;
+                    case LAST -> FIRST;
+                    case CENTER -> CENTER;
+                };
+            default:
+                throw new IllegalArgumentException("Unknown orientation: " + orientation);
+        }
+    }
 }
