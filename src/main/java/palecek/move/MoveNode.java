@@ -39,7 +39,11 @@ public class MoveNode implements BooleanNode {
                 } else if (distanceParts.length > 2) {
                     throw new IllegalArgumentException("Invalid distance format: " + s);
                 }
-                moveComponents.add(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0)));
+                int spacing = 0;
+                if (direction.length() > 2) {
+                    spacing = Integer.parseInt(direction.substring(2,3));
+                }
+                moveComponents.add(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0), spacing));
             } else {
                 throw new IllegalArgumentException("Invalid move format: " + s);
             }
@@ -47,9 +51,6 @@ public class MoveNode implements BooleanNode {
         completeMove();
     }
     private void completeMove() {
-        if (moveComponents.getFirst().getDirection().isInLine(moveComponents.get(1).getDirection())) {
-            throw new IllegalArgumentException("Invalid move format (Directions are in line): " + this);
-        }
         if (moveComponents.size() == 1) {
             MoveComponent component = moveComponents.getFirst();
             if (component.getDirection() == Direction.FORWARD) {
@@ -61,6 +62,9 @@ public class MoveNode implements BooleanNode {
             } else if (component.getDirection() == Direction.RIGHT) {
                 moveComponents.add(new MoveComponent(Direction.BACKWARD, 0, 0));
             }
+        }
+        if (moveComponents.getFirst().getDirection().isInLine(moveComponents.get(1).getDirection())) {
+            throw new IllegalArgumentException("Invalid move format (Directions are in line): " + this);
         }
     }
 
@@ -150,12 +154,12 @@ public class MoveNode implements BooleanNode {
                 Position position = new Position(x, y);
                 if (line1.isRepeting() || line2.isRepeting()) {
                     if (direction1.isVertical()) {
-                        int modulo1 = line2.isRepeting() ? line2.getTo() : maxX + 1;
-                        int modulo2 = line1.isRepeting() ? line1.getTo() : maxY + 1;
+                        int modulo1 = line2.isRepeting() ? line2.getTo() + line2.getSpacing() : maxX + 1;
+                        int modulo2 = line1.isRepeting() ? line1.getTo() + line1.getSpacing() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction2, direction1);
                     } else {
-                        int modulo1 = line1.isRepeting() ? line1.getTo() : maxX + 1;
-                        int modulo2 = line2.isRepeting() ? line2.getTo() : maxY + 1;
+                        int modulo1 = line1.isRepeting() ? line1.getTo() + line1.getSpacing() : maxX + 1;
+                        int modulo2 = line2.isRepeting() ? line2.getTo() + line2.getSpacing() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction1, direction2);
                     }
 

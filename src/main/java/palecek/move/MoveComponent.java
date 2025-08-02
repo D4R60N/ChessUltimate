@@ -8,16 +8,18 @@ public class MoveComponent {
     private int from;
     private int to;
     private boolean isRepeting;
+    private int spacing;
 
-    public MoveComponent(Direction direction, int from, int to, boolean isRepeting) {
+    public MoveComponent(Direction direction, int from, int to, boolean isRepeting, int spacing) {
         this.direction = direction;
         this.from = from;
         this.to = to;
         this.isRepeting = isRepeting;
+        this.spacing = spacing;
     }
 
     public MoveComponent(Direction direction, int from, int to) {
-        this(direction, from, to, false);
+        this(direction, from, to, false, 0);
     }
 
     public Direction getDirection() {
@@ -48,5 +50,9 @@ public class MoveComponent {
     }
     public void setRepeting(boolean repeting) {
         isRepeting = repeting;
+    }
+
+    public int getSpacing() {
+        return spacing;
     }
 }
