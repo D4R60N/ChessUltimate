@@ -1,7 +1,7 @@
 {
   "piece": "pawn",
 
-  "move": "2.3:f+1,1:r+1",
+  "move": "Ff+2:1.2",
   "moveCondition": "1:f,1:l|1:r,1:f o",
 
   "canCapture": true,
@@ -11,4 +11,3 @@
   "action": "",
   "actionCondition": ""
 }
-// repetition když 0 jo a 1 ne

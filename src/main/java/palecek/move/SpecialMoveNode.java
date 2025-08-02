@@ -17,7 +17,8 @@ public class SpecialMoveNode implements BooleanNode {
     private SpecialMovePosition position;
     private int offset;
     private int distance;
-    private boolean isRepeting;
+    private boolean isRepeting = false;
+    private int spacing = 0;
 
     public SpecialMoveNode(String move) {
         String[] m = move.split(Separators.DIRECTION_SEPARATOR);
@@ -34,13 +35,22 @@ public class SpecialMoveNode implements BooleanNode {
         if (distance < offset) {
             throw new IllegalArgumentException("Invalid distance: " + distance + " is less than offset: " + offset);
         }
-        boolean isRepeting = query.endsWith(Operators.REPETITION_OPERATOR);
+
+        if(query.length() > 2) {
+            int spacing = 0;
+            if (query.length() > 3) {
+                spacing = Integer.parseInt(query.substring(3));
+            }
+            boolean isRepeting = query.charAt(2) == Operators.REPETITION_OPERATOR.charAt(0);
+            this.isRepeting = isRepeting;
+            this.spacing = spacing;
+        }
+
 
         this.isRank = query.startsWith("R");
         this.position = SpecialMovePosition.fromString(query.substring(1, 2));
         this.offset = offset;
         this.distance = distance;
-        this.isRepeting = isRepeting;
     }
 
     public boolean isRank() {
@@ -61,6 +71,10 @@ public class SpecialMoveNode implements BooleanNode {
 
     public boolean isRepeting() {
         return isRepeting;
+    }
+
+    public int getSpacing() {
+        return spacing;
     }
 
 
@@ -132,17 +146,23 @@ public class SpecialMoveNode implements BooleanNode {
 
     private void fillPositions(Board board, List<Position> expectedPositions, int distance, int offset, boolean rank) {
         if (rank) {
-            int limit = Math.min(distance, board.getWidth());
-            for (int i = 0; i < board.getWidth(); i++) {
-                for (int j = offset; j <= limit; j++) {
-                    expectedPositions.add(new Position(i, j));
+            int modulo = isRepeting ? this.distance+spacing : board.getHeight();
+            for (int k = offset; k < board.getHeight(); k+= modulo) {
+                int limit = Math.min(distance+k-offset, board.getHeight()-1);
+                for (int i = 0; i < board.getWidth(); i++) {
+                    for (int j = k; j <= limit; j++) {
+                        expectedPositions.add(new Position(i, j));
+                    }
                 }
             }
         } else {
-            int limit = Math.min(distance, board.getHeight());
-            for (int i = 0; i < board.getHeight(); i++) {
-                for (int j = offset; j <= limit; j++) {
-                    expectedPositions.add(new Position(j, i));
+            int modulo = isRepeting ? this.distance+spacing : board.getWidth();
+            for (int k = offset; k < board.getWidth(); k+= modulo) {
+                int limit = Math.min(distance+k-offset, board.getWidth()-1);
+                for (int i = 0; i < board.getHeight(); i++) {
+                    for (int j = k; j <= limit; j++) {
+                        expectedPositions.add(new Position(j, i));
+                    }
                 }
             }
         }
