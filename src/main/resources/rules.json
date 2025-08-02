@@ -1,7 +1,7 @@
 {
   "piece": "pawn",
 
-  "move": "Ff+2:1.2",
+  "move": "Rc+1:1.2",
   "moveCondition": "1:f,1:l|1:r,1:f o",
 
   "canCapture": true,
