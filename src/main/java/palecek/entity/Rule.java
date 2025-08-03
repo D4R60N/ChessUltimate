@@ -18,13 +18,12 @@ public class Rule {
     private String piece;
 //    private List<Move> move;
 //    private List<SpecialMove> specialMove;
-    private BooleanTree move;
-    private String moveCondition;
+    private BooleanTree moveCondition;
     private boolean canCapture;
-    private String captureCondition;
+    private BooleanTree captureCondition;
     private boolean hasAction;
     private String action;
-    private String actionCondition;
+    private BooleanTree actionCondition;
 
     public static Tokenizer tokenizer = new Tokenizer();
 
@@ -36,18 +35,13 @@ public class Rule {
         this.piece = piece;
     }
 
-    public void setMove(String move) {
-        Parser parser = new Parser(tokenizer.tokenize(move));
-        this.move = move.isEmpty() ? null : new BooleanTree(parser.parseExpression());
-        System.out.println("a");
-    }
-
-    public String getMoveCondition() {
+    public BooleanTree getMoveCondition() {
         return moveCondition;
     }
 
     public void setMoveCondition(String moveCondition) {
-        this.moveCondition = moveCondition;
+        Parser parser = new Parser(tokenizer.tokenize(moveCondition));
+        this.moveCondition = moveCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
     public boolean isCanCapture() {
@@ -58,12 +52,13 @@ public class Rule {
         this.canCapture = canCapture;
     }
 
-    public String getCaptureCondition() {
+    public BooleanTree getCaptureCondition() {
         return captureCondition;
     }
 
     public void setCaptureCondition(String captureCondition) {
-        this.captureCondition = captureCondition;
+        Parser parser = new Parser(tokenizer.tokenize(captureCondition));
+        this.captureCondition = captureCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
     public boolean isHasAction() {
@@ -82,19 +77,19 @@ public class Rule {
         this.action = action;
     }
 
-    public String getActionCondition() {
+    public BooleanTree getActionCondition() {
         return actionCondition;
     }
 
     public void setActionCondition(String actionCondition) {
-        this.actionCondition = actionCondition;
+        Parser parser = new Parser(tokenizer.tokenize(actionCondition));
+        this.actionCondition = actionCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
     @Override
     public String toString() {
         return "Rule{" +
                 "piece='" + piece + '\'' +
-                ", move='" + move + '\'' +
                 ", moveCondition='" + moveCondition + '\'' +
                 ", canCapture=" + canCapture +
                 ", captureCondition='" + captureCondition + '\'' +
@@ -105,7 +100,7 @@ public class Rule {
     }
 
     public boolean isApplicable(Position from, Position to, Orientation orientation, Board board) {
-        if (move == null || move == Collections.EMPTY_LIST) {
+        if (moveCondition == null || moveCondition == Collections.EMPTY_LIST) {
             if (!from.equals(to)) {
                 return false;
             }
@@ -117,7 +112,7 @@ public class Rule {
                 "orientation", orientation,
                 "board", board
         );
-        return move.evaluate(context);
+        return moveCondition.evaluate(context);
     }
 
     public boolean canMove(Position from, Position to) {

@@ -10,7 +10,6 @@ public class MoveLiteralNodeParser {
                 : new MoveNode(value);
     }
     private static boolean containsSpecialChar(String component) {
-        return component.charAt(0) == 'F' ||
-                component.charAt(0) == 'R';
+        return component.charAt(0) == '$';
     }
 }

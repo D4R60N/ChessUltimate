@@ -21,7 +21,7 @@ public class SpecialMoveNode implements BooleanNode {
     private int spacing = 0;
 
     public SpecialMoveNode(String move) {
-        String[] m = move.split(Separators.DIRECTION_SEPARATOR);
+        String[] m = move.substring(1).split(Separators.DIRECTION_SEPARATOR);
         if (m.length > 3 || m.length < 2) {
             throw new IllegalArgumentException("Invalid move format: " + move);
         }

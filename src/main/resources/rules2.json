@@ -1,7 +1,7 @@
 {
   "piece": "pawn",
 
-  "move": "2.3:b,2.3:r+ | 2.*:b+,2.3:l+",
+  "move": "TO-2.3:b,2.3:r+ | TO-2.*:b+,2.3:l+ | $Rc+1:1.2",
   "moveCondition": "1:f,1:l|1:r,1:f o",
 
   "canCapture": true,

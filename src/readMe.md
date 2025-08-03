@@ -7,6 +7,7 @@ r - right
 * - distance to end of the board
 
 # rank/file moves
+$ - starting symbol for recognition
 F - file
 R - rank
 c - center
@@ -19,10 +20,11 @@ a - ally
 unitId - specific unit
 
 # spaces
-o - open
-r - obstacle
-s - starting space
-p - promotion space
+O - open
+"?" - whatever symbol
+E - enemy
+A - ally
+TO - to space
 
 # logic
 & - and

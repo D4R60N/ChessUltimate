@@ -12,44 +12,56 @@ import java.util.Map;
 public class MoveNode implements BooleanNode {
 
     private List<MoveComponent> moveComponents;
+    private final Space space;
 
     public MoveNode(String move) {
-        moveComponents = new ArrayList<>();
-        String[] m = move.split(Separators.DIMENSION_SEPARATOR);
-        if (m.length > 2) {
+        String[] separatedStrings = move.split(Separators.TYPE_SEPARATOR);
+        if (separatedStrings.length > 2) {
             throw new IllegalArgumentException("Invalid move format: " + move);
         }
-        for (String s : m) {
-            String[] parts = s.split(Separators.DIRECTION_SEPARATOR);
-            if (parts.length == 2) {
-                String direction = parts[1].trim();
-                String[] distanceParts = parts[0].split(Separators.INNER_SEPARATOR);
-                int from = Integer.parseInt(distanceParts[0].trim());
-                int to = from;
-                if (distanceParts.length == 2) {
-                    if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
-                        to = Integer.MAX_VALUE;
-                    } else {
-                        to = Integer.parseInt(distanceParts[1].trim());
-                    }
+        this.space = Space.getFromString(separatedStrings[0]);
 
-                    if (to < from) {
-                        throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
-                    }
-                } else if (distanceParts.length > 2) {
-                    throw new IllegalArgumentException("Invalid distance format: " + s);
-                }
-                int spacing = 0;
-                if (direction.length() > 2) {
-                    spacing = Integer.parseInt(direction.substring(2,3));
-                }
-                moveComponents.add(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0), spacing));
-            } else {
-                throw new IllegalArgumentException("Invalid move format: " + s);
+        moveComponents = new ArrayList<>();
+        if (separatedStrings.length == 2) {
+            String[] m = separatedStrings[1].split(Separators.DIMENSION_SEPARATOR);
+            if (m.length > 2) {
+                throw new IllegalArgumentException("Invalid move format: " + move);
             }
+            for (String s : m) {
+                String[] parts = s.split(Separators.DIRECTION_SEPARATOR);
+                if (parts.length == 2) {
+                    String direction = parts[1].trim();
+                    String[] distanceParts = parts[0].split(Separators.INNER_SEPARATOR);
+                    int from = Integer.parseInt(distanceParts[0].trim());
+                    int to = from;
+                    if (distanceParts.length == 2) {
+                        if (distanceParts[1].equals(Operators.INF_OPERATOR)) {
+                            to = Integer.MAX_VALUE;
+                        } else {
+                            to = Integer.parseInt(distanceParts[1].trim());
+                        }
+
+                        if (to < from) {
+                            throw new IllegalArgumentException("Invalid from: " + from + " is greater than " + to);
+                        }
+                    } else if (distanceParts.length > 2) {
+                        throw new IllegalArgumentException("Invalid distance format: " + s);
+                    }
+                    int spacing = 0;
+                    if (direction.length() > 2) {
+                        spacing = Integer.parseInt(direction.substring(2, 3));
+                    }
+                    moveComponents.add(new MoveComponent(Direction.fromSymbol(direction.substring(0, 1)), from, to, direction.length() > 1 && direction.charAt(1) == Operators.REPETITION_OPERATOR.charAt(0), spacing));
+                } else {
+                    throw new IllegalArgumentException("Invalid move format: " + s);
+                }
+            }
+        } else {
+            moveComponents.add(new MoveComponent(Direction.FORWARD, 0, 0));
         }
         completeMove();
     }
+
     private void completeMove() {
         if (moveComponents.size() == 1) {
             MoveComponent component = moveComponents.getFirst();
@@ -82,7 +94,7 @@ public class MoveNode implements BooleanNode {
 
     @Override
     public boolean evaluate(Map<String, Object> context) {
-        Position from = (Position) context.get("from");
+        Position from = (Position) context.get(space.getValue().toLowerCase());
         Orientation orientation = (Orientation) context.get("orientation");
         Board board = (Board) context.get("board");
         Position to = (Position) context.get("to");
