@@ -1,7 +1,7 @@
 {
   "piece": "pawn",
 
-  "moveCondition": "$Rc+1:1.2",
+  "moveCondition": "$Rc+1:1.2 ^ ($Rc+1:1.2 | $Rc+1:1.2)",
 
   "canCapture": true,
   "captureCondition": "",

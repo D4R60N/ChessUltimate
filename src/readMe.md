@@ -29,6 +29,7 @@ TO - to space
 # logic
 & - and
 | - or
+^ - xor
 ! - not
 
 # game

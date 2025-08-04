@@ -9,15 +9,11 @@ import palecek.utils.booleantree.BooleanTree;
 import palecek.utils.token.Parser;
 import palecek.utils.token.Tokenizer;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 public class Rule {
     private String piece;
-//    private List<Move> move;
-//    private List<SpecialMove> specialMove;
     private BooleanTree moveCondition;
     private boolean canCapture;
     private BooleanTree captureCondition;
@@ -42,6 +38,7 @@ public class Rule {
     public void setMoveCondition(String moveCondition) {
         Parser parser = new Parser(tokenizer.tokenize(moveCondition));
         this.moveCondition = moveCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
+        System.out.println("s");
     }
 
     public boolean isCanCapture() {

@@ -18,9 +18,17 @@ public class Parser {
     }
 
     private BooleanNode parseOr() {
-        BooleanNode node = parseAnd();
+        BooleanNode node = parseXor();
         while (match(TokenType.OR)) {
             node = new OrNode(node, parseAnd());
+        }
+        return node;
+    }
+
+    private BooleanNode parseXor() {
+        BooleanNode node = parseAnd();
+        while (match(TokenType.XOR)) {
+            node = new XorNode(node, parseOr());
         }
         return node;
     }
@@ -70,15 +78,5 @@ public class Parser {
 
     private Token prev() {
         return tokens.get(pos - 1);
-    }
-
-    public static void main(String[] args) {
-        String input = "A";
-        List<Token> tokens = (new Tokenizer()).tokenize(input);
-        Parser parser = new Parser(tokens);
-        BooleanNode tree = parser.parseExpression();
-
-        // You can now evaluate or traverse the tree
-        System.out.println("Parsed successfully.");
     }
 }
