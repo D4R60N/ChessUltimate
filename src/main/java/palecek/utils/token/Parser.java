@@ -8,9 +8,15 @@ import java.util.List;
 public class Parser {
     private List<Token> tokens;
     private int pos = 0;
+    private boolean isCondition;
+
+    public Parser(List<Token> tokens, boolean isCondition) {
+        this.tokens = tokens;
+        this.isCondition = isCondition;
+    }
 
     public Parser(List<Token> tokens) {
-        this.tokens = tokens;
+        this(tokens, false);
     }
 
     public BooleanNode parseExpression() {
@@ -55,7 +61,7 @@ public class Parser {
             return node;
         }
         if (match(TokenType.LITERAL)) {
-            return MoveLiteralNodeParser.parse(prev().value);
+            return MoveLiteralNodeParser.parse(prev().value, isCondition);
         }
         throw new RuntimeException("Unexpected token: " + peek().value);
     }

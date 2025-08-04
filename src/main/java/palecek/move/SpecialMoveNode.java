@@ -2,15 +2,16 @@ package palecek.move;
 
 import palecek.entity.Board;
 import palecek.entity.Position;
+import palecek.entity.Rule;
 import palecek.utils.Operators;
 import palecek.utils.Orientation;
 import palecek.utils.Separators;
 import palecek.utils.SpecialMovePosition;
 import palecek.utils.booleantree.BooleanNode;
+import palecek.utils.booleantree.BooleanTree;
+import palecek.utils.token.Parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SpecialMoveNode implements BooleanNode {
     private boolean isRank;
@@ -19,9 +20,15 @@ public class SpecialMoveNode implements BooleanNode {
     private int distance;
     private boolean isRepeting = false;
     private int spacing = 0;
+    private BooleanTree condition;
 
     public SpecialMoveNode(String move) {
-        String[] m = move.substring(1).split(Separators.DIRECTION_SEPARATOR);
+        String[] separatedStrings = move.split(Separators.TYPE_SEPARATOR);
+        if (separatedStrings.length != 2) {
+            throw new IllegalArgumentException("Invalid move format: " + move);
+        }
+
+        String[] m = separatedStrings[0].substring(1).split(Separators.DIRECTION_SEPARATOR);
         if (m.length > 3 || m.length < 2) {
             throw new IllegalArgumentException("Invalid move format: " + move);
         }
@@ -51,6 +58,10 @@ public class SpecialMoveNode implements BooleanNode {
         this.position = SpecialMovePosition.fromString(query.substring(1, 2));
         this.offset = offset;
         this.distance = distance;
+
+        String condition = separatedStrings[1];
+        Parser parser = new Parser(Rule.tokenizer.tokenize(condition, false), true);
+        this.condition = condition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
     public boolean isRank() {
@@ -83,17 +94,20 @@ public class SpecialMoveNode implements BooleanNode {
         Position to = (Position) context.get("to");
         Orientation orientation = (Orientation) context.get("orientation");
         Board board = (Board) context.get("board");
-        List<Position> expectedPositions = calculateExpectedPositions(orientation, board);
+        Set<Position> expectedPositions = calculateExpectedPositions(orientation, board);
 
-        for (Position pos : expectedPositions) {
-            board.setCell(pos.getX(), pos.getY(), "UWU");
-        }
+        Map<String, Object> conditionContext = new HashMap<>();
+        conditionContext.put("to", to);
+        conditionContext.put("board", board);
+        conditionContext.put("positions", expectedPositions);
+        conditionContext.put("player", context.get("player"));
+        conditionContext.put("turn", context.get("turn"));
 
-        return expectedPositions.contains(to);
+        return condition.evaluate(conditionContext);
     }
 
-    private List<Position> calculateExpectedPositions(Orientation orientation, Board board) {
-        List<Position> expectedPositions = new ArrayList<>();
+    private Set<Position> calculateExpectedPositions(Orientation orientation, Board board) {
+        Set<Position> expectedPositions = new HashSet<>();
 
         boolean rank = (orientation == Orientation.NORTH || orientation == Orientation.SOUTH) == isRank;
         SpecialMovePosition pos = position.rotate(orientation);
@@ -149,12 +163,12 @@ public class SpecialMoveNode implements BooleanNode {
         return expectedPositions;
     }
 
-    private void fillPositions(Board board, List<Position> expectedPositions, int distance, int offset, boolean rank, boolean isReversed) {
-        int lenght = this.distance - this.offset + 1;
+    private void fillPositions(Board board, Set<Position> expectedPositions, int distance, int offset, boolean rank, boolean isReversed) {
+        int length = this.distance - this.offset + 1;
         if (isReversed) {
             if (rank) {
-                int modulo = isRepeting ? lenght + spacing : board.getHeight();
-                for (int k = offset; k+lenght >= 0; k -= modulo) {
+                int modulo = isRepeting ? length + spacing : board.getHeight();
+                for (int k = offset; k+length >= 0; k -= modulo) {
                     int limit = Math.min(distance + k - offset, board.getHeight() - 1);
                     for (int i = 0; i < board.getWidth(); i++) {
                         for (int j = k; j <= limit; j++) {
@@ -163,8 +177,8 @@ public class SpecialMoveNode implements BooleanNode {
                     }
                 }
             } else {
-                int modulo = isRepeting ? lenght + spacing : board.getWidth();
-                for (int k = offset; k+lenght >= 0; k -= modulo) {
+                int modulo = isRepeting ? length + spacing : board.getWidth();
+                for (int k = offset; k+length >= 0; k -= modulo) {
                     int limit = Math.min(distance + k - offset, board.getWidth() - 1);
                     for (int i = 0; i < board.getHeight(); i++) {
                         for (int j = k; j <= limit; j++) {
@@ -175,7 +189,7 @@ public class SpecialMoveNode implements BooleanNode {
             }
         } else {
             if (rank) {
-                int modulo = isRepeting ? lenght + spacing : board.getHeight();
+                int modulo = isRepeting ? length + spacing : board.getHeight();
                 for (int k = offset; k < board.getHeight(); k += modulo) {
                     int limit = Math.min(distance + k - offset, board.getHeight() - 1);
                     for (int i = 0; i < board.getWidth(); i++) {
@@ -185,7 +199,7 @@ public class SpecialMoveNode implements BooleanNode {
                     }
                 }
             } else {
-                int modulo = isRepeting ? lenght + spacing : board.getWidth();
+                int modulo = isRepeting ? length + spacing : board.getWidth();
                 for (int k = offset; k < board.getWidth(); k += modulo) {
                     int limit = Math.min(distance + k - offset, board.getWidth() - 1);
                     for (int i = 0; i < board.getHeight(); i++) {

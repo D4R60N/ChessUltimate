@@ -3,15 +3,15 @@ package palecek.entity;
 public class Board {
     private final int width;
     private final int height;
-    private String[][] grid;
+    private Space[][] grid;
 
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
-        this.grid = new String[height][width];
+        this.grid = new Space[height][width];
     }
 
-    public Board(String[][] grid) {
+    public Board(Space[][] grid) {
         if (grid == null || grid.length == 0 || grid[0].length == 0) {
             throw new IllegalArgumentException("Grid cannot be null or empty");
         }
@@ -28,25 +28,25 @@ public class Board {
         return height;
     }
 
-    public String getFromPosition(Position position) {
+    public Space getFromPosition(Position position) {
         return getCell(position.getX(), position.getY());
     }
 
-    public void setFromPosition(Position position, String value) {
+    public void setFromPosition(Position position, Space value) {
         setCell(position.getX(), position.getY(), value);
     }
 
-    public String[][] getGrid() {
+    public Space[][] getGrid() {
         return grid;
     }
 
-    public void setCell(int x, int y, String value) {
+    public void setCell(int x, int y, Space value) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             grid[y][x] = value;
         }
     }
 
-    public String getCell(int x, int y) {
+    public Space getCell(int x, int y) {
         if (x >= 0 && x < width && y >= 0 && y < height) {
             return grid[y][x];
         }
@@ -58,7 +58,7 @@ public class Board {
         int maxCellLength = 1;
         for (int row = 0; row < height; row++) {
             for (int col = 0; col < width; col++) {
-                String cell = grid[row][col];
+                String cell = grid[row][col].toString();
                 if (cell != null && cell.length() > maxCellLength)
                     maxCellLength = cell.length();
             }
@@ -88,7 +88,7 @@ public class Board {
         for (int row = 0; row < height; row++) {
             sb.append(String.format("%2d ", row)); // Pad row labels
             for (int col = 0; col < width; col++) {
-                String cell = grid[row][col];
+                String cell = grid[row][col].toString();
                 if (cell == null) cell = "";
                 sb.append("|").append(center(cell, cellWidth));
             }

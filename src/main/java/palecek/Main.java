@@ -3,6 +3,7 @@ package palecek;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import palecek.entity.Board;
 import palecek.entity.Rule;
+import palecek.entity.Space;
 import palecek.utils.CSVReader;
 
 import java.util.Collections;
@@ -15,7 +16,7 @@ public class Main {
         try{
             Rule rule = mapper.readValue(Main.class.getResourceAsStream("/rules.json"), Rule.class);
             System.out.println(rule);
-            String[][] boardData = CSVReader.readCSVTo2DArray("src/main/resources/board.csv");
+            Space[][] boardData = CSVReader.readCSVTo2DArray("src/main/resources/board2.csv");
             Board board = new Board(boardData);
             RuleResolver ruleResolver = new RuleResolver();
             ruleResolver.setRules(Map.of("pawn", Collections.singletonList(rule)));

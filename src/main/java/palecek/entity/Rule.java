@@ -1,9 +1,6 @@
 package palecek.entity;
 
-import palecek.move.MoveNode;
-import palecek.move.MoveComponent;
-import palecek.move.SpecialMoveNode;
-import palecek.move.SpecialMoveComponent;
+import palecek.Player;
 import palecek.utils.*;
 import palecek.utils.booleantree.BooleanTree;
 import palecek.utils.token.Parser;
@@ -36,7 +33,7 @@ public class Rule {
     }
 
     public void setMoveCondition(String moveCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(moveCondition));
+        Parser parser = new Parser(tokenizer.tokenize(moveCondition, true));
         this.moveCondition = moveCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
         System.out.println("s");
     }
@@ -54,7 +51,7 @@ public class Rule {
     }
 
     public void setCaptureCondition(String captureCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(captureCondition));
+        Parser parser = new Parser(tokenizer.tokenize(captureCondition, true));
         this.captureCondition = captureCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
@@ -79,7 +76,7 @@ public class Rule {
     }
 
     public void setActionCondition(String actionCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(actionCondition));
+        Parser parser = new Parser(tokenizer.tokenize(actionCondition, true));
         this.actionCondition = actionCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
@@ -96,8 +93,12 @@ public class Rule {
                 '}';
     }
 
-    public boolean isApplicable(Position from, Position to, Orientation orientation, Board board) {
-        if (moveCondition == null || moveCondition == Collections.EMPTY_LIST) {
+    public boolean isApplicable(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
+        return true; //todo
+    }
+
+    public boolean canMove(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
+        if (moveCondition == null) {
             if (!from.equals(to)) {
                 return false;
             }
@@ -107,20 +108,32 @@ public class Rule {
                 "from", from,
                 "to", to,
                 "orientation", orientation,
-                "board", board
+                "board", board,
+                "player", player,
+                "turn", turn
         );
         return moveCondition.evaluate(context);
     }
 
-    public boolean canMove(Position from, Position to) {
-        return true;
-    }
-
-    public boolean canCapture(Position from, Position to) {
+    public boolean canCapture(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
         if (!canCapture) {
             return false;
         }
-        return true;
+        if (captureCondition == null) {
+            if (!from.equals(to)) {
+                return false;
+            }
+            return true; // No move defined, so the piece can stay in place
+        }
+        Map<String, Object> context = Map.of(
+                "from", from,
+                "to", to,
+                "orientation", orientation,
+                "board", board,
+                "player", player,
+                "turn", turn
+        );
+        return captureCondition.evaluate(context);
     }
 
 

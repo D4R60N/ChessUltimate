@@ -1,10 +1,10 @@
 {
   "piece": "pawn",
 
-  "moveCondition": "$Rc+1:1.2 ^ ($Rc+1:1.2 | $Rc+1:1.2)",
+  "moveCondition": "FROM-1:f-TO&O",
 
   "canCapture": true,
-  "captureCondition": "",
+  "captureCondition": "FROM-1:f,1:r-TO&E | FROM-1:f,1:l-TO&E",
 
   "hasAction": false,
   "action": "",

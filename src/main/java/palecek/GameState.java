@@ -14,12 +14,14 @@ public class GameState {
     private Board board;
     private RuleResolver ruleResolver;
     private List<Player> players;
+    private int turnCount;
 
     public GameState(int playerOnTurn, int numberOfPlayers, Board board, RuleResolver ruleResolver) {
         this.playerOnTurn = playerOnTurn;
         this.numberOfPlayers = numberOfPlayers;
         this.board = board;
         this.ruleResolver = ruleResolver;
+        this.turnCount = 0;
         if (numberOfPlayers <= 0) {
             throw new IllegalArgumentException("Number of players must be greater than 0");
         }
@@ -34,7 +36,7 @@ public class GameState {
         }
         this.players = new ArrayList<>(numberOfPlayers);
         for(int i = 0; i < numberOfPlayers; i++) {
-            players.add(new Player(Orientation.fromValue(i % Orientation.values().length)));
+            players.add(new Player(Orientation.fromValue(i % Orientation.values().length), i));
         }
     }
 
@@ -65,6 +67,10 @@ public class GameState {
         return players.get(playerOnTurn);
     }
 
+    public int getTurn() {
+        return turnCount;
+    }
+
     public void makeMove(String move) {
         String[] split = move.split(Separators.SPACE_SEPARATOR);
         if (split.length != 2) {
@@ -74,6 +80,7 @@ public class GameState {
         Position to = new Position(split[1]);
         if(ruleResolver.resolveMove(from, to, this)) {
             playerOnTurn = ((playerOnTurn+1) % numberOfPlayers);
+            turnCount++;
         }
     }
 }

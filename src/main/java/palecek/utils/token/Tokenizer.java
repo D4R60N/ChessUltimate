@@ -10,6 +10,7 @@ public class Tokenizer {
     private final String xorSymbol = "^";
     private final String notSymbol = "!";
     private final String regex;
+    private final String spaceSensitiveRegex;
 
     public Tokenizer() {
         String escapedAnd = Pattern.quote(andSymbol);
@@ -18,23 +19,41 @@ public class Tokenizer {
         String escapedNot = Pattern.quote(notSymbol);
         regex = "(?=" + escapedAnd + "|" + escapedOr + "|" + escapedXor + "|" + escapedNot + "|\\(|\\))"
                 + "|(?<=" + escapedAnd + "|" + escapedOr + "|" + escapedXor + "|" + escapedNot + "|\\(|\\))";
+        spaceSensitiveRegex =
+                "(?<=\\s)(?=" + escapedAnd + "|" + escapedOr + "|" + escapedXor + "|" + escapedNot + ")"
+                        + "|(?<=" + escapedAnd + "|" + escapedOr + "|" + escapedXor + "|" + escapedNot + ")(?=\\s)"
+                        + "|(?=[()])|(?<=[()])";
     }
 
 
-    public List<Token> tokenize(String input) {
+    public List<Token> tokenize(String input, boolean spaceSensitive) {
         List<Token> tokens = new ArrayList<>();
-        String[] parts = input.split(regex);
+        String[] parts = input.split(spaceSensitive ? spaceSensitiveRegex : regex);
         for (String part : parts) {
             part = part.trim();
             if (part.isEmpty()) continue;
             switch (part.toUpperCase()) {
-                case andSymbol: tokens.add(new Token(TokenType.AND, part)); break;
-                case orSymbol: tokens.add(new Token(TokenType.OR, part)); break;
-                case xorSymbol: tokens.add(new Token(TokenType.XOR, part)); break;
-                case notSymbol: tokens.add(new Token(TokenType.NOT, part)); break;
-                case "(": tokens.add(new Token(TokenType.LPAREN, part)); break;
-                case ")": tokens.add(new Token(TokenType.RPAREN, part)); break;
-                default: tokens.add(new Token(TokenType.LITERAL, part)); break;
+                case andSymbol:
+                    tokens.add(new Token(TokenType.AND, part));
+                    break;
+                case orSymbol:
+                    tokens.add(new Token(TokenType.OR, part));
+                    break;
+                case xorSymbol:
+                    tokens.add(new Token(TokenType.XOR, part));
+                    break;
+                case notSymbol:
+                    tokens.add(new Token(TokenType.NOT, part));
+                    break;
+                case "(":
+                    tokens.add(new Token(TokenType.LPAREN, part));
+                    break;
+                case ")":
+                    tokens.add(new Token(TokenType.RPAREN, part));
+                    break;
+                default:
+                    tokens.add(new Token(TokenType.LITERAL, part));
+                    break;
             }
         }
         return tokens;

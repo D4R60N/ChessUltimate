@@ -2,27 +2,30 @@ package palecek.move;
 
 import palecek.entity.Board;
 import palecek.entity.Position;
+import palecek.entity.Rule;
 import palecek.utils.*;
 import palecek.utils.booleantree.BooleanNode;
+import palecek.utils.booleantree.BooleanTree;
+import palecek.utils.token.Parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MoveNode implements BooleanNode {
 
     private List<MoveComponent> moveComponents;
     private final Space space;
+    private BooleanTree condition;
 
     public MoveNode(String move) {
         String[] separatedStrings = move.split(Separators.TYPE_SEPARATOR);
-        if (separatedStrings.length > 2) {
+        int lastIndex = separatedStrings.length - 1;
+        if (separatedStrings.length > 3 || separatedStrings.length < 2) {
             throw new IllegalArgumentException("Invalid move format: " + move);
         }
         this.space = Space.getFromString(separatedStrings[0]);
 
         moveComponents = new ArrayList<>();
-        if (separatedStrings.length == 2) {
+        if (separatedStrings.length == 3) {
             String[] m = separatedStrings[1].split(Separators.DIMENSION_SEPARATOR);
             if (m.length > 2) {
                 throw new IllegalArgumentException("Invalid move format: " + move);
@@ -60,6 +63,10 @@ public class MoveNode implements BooleanNode {
             moveComponents.add(new MoveComponent(Direction.FORWARD, 0, 0));
         }
         completeMove();
+
+        String condition = separatedStrings[lastIndex];
+        Parser parser = new Parser(Rule.tokenizer.tokenize(condition, false), true);
+        this.condition = condition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
     private void completeMove() {
@@ -101,17 +108,20 @@ public class MoveNode implements BooleanNode {
         if (from == null || orientation == null || board == null) {
             return false; // Invalid context
         }
-        List<Position> expectedPositions = calculateExpectedPositions(from, moveComponents, orientation, board);
+        Set<Position> expectedPositions = calculateExpectedPositions(from, moveComponents, orientation, board);
 
-        for (Position pos : expectedPositions) {
-            board.setCell(pos.getX(), pos.getY(), "ĐĐĐ");
-        }
+        Map<String, Object> conditionContext = new HashMap<>();
+        conditionContext.put("to", to);
+        conditionContext.put("board", board);
+        conditionContext.put("positions", expectedPositions);
+        conditionContext.put("player", context.get("player"));
+        conditionContext.put("turn", context.get("turn"));
 
-        return expectedPositions.contains(to);
+        return condition.evaluate(conditionContext);
     }
 
-    private List<Position> calculateExpectedPositions(Position from, List<MoveComponent> move, Orientation orientation, Board board) {
-        List<Position> expectedPositions = new ArrayList<>();
+    private Set<Position> calculateExpectedPositions(Position from, List<MoveComponent> move, Orientation orientation, Board board) {
+        Set<Position> expectedPositions = new HashSet<>();
 
         for (int i = 0; i < move.size(); i++) {
             MoveComponent line1 = move.get(i);
@@ -127,7 +137,7 @@ public class MoveNode implements BooleanNode {
         return expectedPositions;
     }
 
-    private void fillPositions(List<Position> positions, MoveComponent line1, MoveComponent line2, Position from, Orientation orientation, Board board) {
+    private void fillPositions(Set<Position> positions, MoveComponent line1, MoveComponent line2, Position from, Orientation orientation, Board board) {
         int maxX = board.getWidth() - 1;
         int maxY = board.getHeight() - 1;
         Direction direction1 = line1.getDirection().getDirectionFromOrientation(orientation);
@@ -194,7 +204,7 @@ public class MoveNode implements BooleanNode {
      * @param direction1 The direction for the first axis (horizontal).
      * @param direction2 The direction for the second axis (vertical).
      */
-    private void repete(Position pos, int modulo1, int modulo2, List<Position> positions, int maxX, int maxY, Direction direction1, Direction direction2) {
+    private void repete(Position pos, int modulo1, int modulo2, Set<Position> positions, int maxX, int maxY, Direction direction1, Direction direction2) {
         int x = pos.getX();
         int y = pos.getY();
         if (direction1.isNegative() && direction2.isNegative()) {
