@@ -6,20 +6,27 @@ import palecek.entity.Rule;
 import palecek.entity.Space;
 import palecek.utils.CSVReader;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
         ObjectMapper mapper = new ObjectMapper();
 
         try{
-            Rule rule = mapper.readValue(Main.class.getResourceAsStream("/rules.json"), Rule.class);
-            System.out.println(rule);
+            Rule[] rules = mapper.readValue(Main.class.getResourceAsStream("/rules.json"), Rule[].class);
             Space[][] boardData = CSVReader.readCSVTo2DArray("src/main/resources/board2.csv");
             Board board = new Board(boardData);
             RuleResolver ruleResolver = new RuleResolver();
-            ruleResolver.setRules(Map.of("pawn", Collections.singletonList(rule)));
+            Map<String, List<Rule>> ruleMap = new HashMap<>();
+            for (Rule rule : rules) {
+                String piece = rule.getPiece();
+                if (!ruleMap.containsKey(piece)) {
+                    ruleMap.put(piece, Collections.singletonList(rule));
+                } else {
+                    ruleMap.get(piece).add(rule);
+                }
+            }
+            ruleResolver.setRules(ruleMap);
             GameState gameState = new GameState(0, 2, board, ruleResolver);
             System.out.println(board);
             System.out.println(gameState.getPlayerOnTurn());

@@ -112,6 +112,7 @@ public class MoveNode implements BooleanNode {
 
         Map<String, Object> conditionContext = new HashMap<>();
         conditionContext.put("to", to);
+        conditionContext.put("from", from);
         conditionContext.put("board", board);
         conditionContext.put("positions", expectedPositions);
         conditionContext.put("player", context.get("player"));
@@ -180,8 +181,8 @@ public class MoveNode implements BooleanNode {
                         int modulo2 = line1.isRepeting() ? line1.getTo() - line1.getFrom() + 1 + line1.getSpacing() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction2, direction1);
                     } else {
-                        int modulo1 = line1.isRepeting() ? line1.getTo() - line1.getFrom() + line1.getSpacing() : maxX + 1;
-                        int modulo2 = line2.isRepeting() ? line2.getTo() - line2.getFrom() + line2.getSpacing() : maxY + 1;
+                        int modulo1 = line1.isRepeting() ? line1.getTo() - line1.getFrom() + 1 + line1.getSpacing() : maxX + 1;
+                        int modulo2 = line2.isRepeting() ? line2.getTo() - line2.getFrom() + 1 + line2.getSpacing() : maxY + 1;
                         repete(position, modulo1, modulo2, positions, maxX, maxY, direction1, direction2);
                     }
 

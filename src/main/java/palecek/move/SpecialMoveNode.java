@@ -38,7 +38,7 @@ public class SpecialMoveNode implements BooleanNode {
         int distance = dimensions.length > 1 ?
                 (dimensions[1].equals(Operators.INF_OPERATOR) ?
                         Integer.MAX_VALUE - offset : Integer.parseInt(dimensions[1].trim()))
-                : 1;
+                : offset;
         if (distance < offset) {
             throw new IllegalArgumentException("Invalid distance: " + distance + " is less than offset: " + offset);
         }
@@ -92,12 +92,14 @@ public class SpecialMoveNode implements BooleanNode {
     @Override
     public boolean evaluate(Map<String, Object> context) {
         Position to = (Position) context.get("to");
+        Position from = (Position) context.get("from");
         Orientation orientation = (Orientation) context.get("orientation");
         Board board = (Board) context.get("board");
         Set<Position> expectedPositions = calculateExpectedPositions(orientation, board);
 
         Map<String, Object> conditionContext = new HashMap<>();
         conditionContext.put("to", to);
+        conditionContext.put("from", from);
         conditionContext.put("board", board);
         conditionContext.put("positions", expectedPositions);
         conditionContext.put("player", context.get("player"));

@@ -34,7 +34,7 @@ public class RuleResolver {
             throw new IllegalArgumentException("Invalid move: no space at to position");
         }
         String toSpaceOccupant = toSpace.getHead();
-        boolean toHasOccupant = toSpaceOccupant != null && toSpace.getPlayer() != playerOnTurn;
+        boolean toHasOccupant = toSpaceOccupant != null;
 
         // appyng rules
         String pieceType = fromSpaceOccupant[1];
