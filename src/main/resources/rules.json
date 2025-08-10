@@ -4,8 +4,8 @@
     "moveCondition": "FROM-1:f-TO | (Rf:1-FROM & FROM-2:f-TO)",
     "canCapture": true,
     "captureCondition": "FROM-1:f,1:r-TO&E | FROM-1:f,1:l-TO&E",
-    "hasAction": false,
-    "action": "",
+    "hasAction": true,
+    "action": "CREATE-TO-P:queen,rook,bishop,knight",
     "actionCondition": "Rl:0-TO"
   },
   {

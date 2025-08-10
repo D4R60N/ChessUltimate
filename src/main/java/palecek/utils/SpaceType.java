@@ -1,11 +1,11 @@
 package palecek.utils;
 
-public enum Space {
+public enum SpaceType {
     FROM("FROM"),
     TO("TO");
 
     private final String value;
-    Space(String value) {
+    SpaceType(String value) {
         this.value = value;
     }
 
@@ -13,10 +13,10 @@ public enum Space {
         return value;
     }
 
-    public static Space getFromString(String value) {
-        for (Space space : Space.values()) {
-            if (space.value.equalsIgnoreCase(value)) {
-                return space;
+    public static SpaceType getFromString(String value) {
+        for (SpaceType spaceType : SpaceType.values()) {
+            if (spaceType.value.equalsIgnoreCase(value)) {
+                return spaceType;
             }
         }
         throw new IllegalArgumentException("No Space found for value: " + value);

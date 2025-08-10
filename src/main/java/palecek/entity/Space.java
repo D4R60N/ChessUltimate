@@ -3,10 +3,14 @@ package palecek.entity;
 public class Space {
     private String head;
     private String tail;
+    private String uncommittedHead;
+    private String uncommittedTail;
 
     public Space(String head, String tail) {
         this.head = head;
         this.tail = tail;
+        this.uncommittedHead = "X"; // X means no uncommitted value
+        this.uncommittedTail = "X"; // X means no uncommitted value
     }
 
     public String getHead() {
@@ -15,6 +19,30 @@ public class Space {
 
     public void setHead(String head) {
         this.head = head;
+    }
+
+    public void setUncommittedHead(String uncommittedHead) {
+        this.uncommittedHead = uncommittedHead;
+    }
+
+    public String getUncommittedHead() {
+        return uncommittedHead;
+    }
+
+    public void commit() {
+        if (!"X".equals(uncommittedHead)) {
+            this.head = uncommittedHead;
+            this.uncommittedHead = "X";
+        }
+        if (!"X".equals(uncommittedTail)) {
+            this.tail = uncommittedTail;
+            this.uncommittedTail = "X";
+        }
+    }
+
+    public void rollback() {
+        this.uncommittedHead = "X";
+        this.uncommittedTail = "X";
     }
 
     public String getTail() {

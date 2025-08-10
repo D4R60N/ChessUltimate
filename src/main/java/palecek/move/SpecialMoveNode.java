@@ -95,7 +95,7 @@ public class SpecialMoveNode implements BooleanNode {
         Position from = (Position) context.get("from");
         Orientation orientation = (Orientation) context.get("orientation");
         Board board = (Board) context.get("board");
-        Set<Position> expectedPositions = calculateExpectedPositions(orientation, board);
+        Set<Position> expectedPositions = SpecialMoveUtils.calculateExpectedPositions(orientation, board, distance, offset, isRank, isRepeting, spacing, position);
 
         Map<String, Object> conditionContext = new HashMap<>();
         conditionContext.put("to", to);
@@ -108,109 +108,5 @@ public class SpecialMoveNode implements BooleanNode {
         return condition.evaluate(conditionContext);
     }
 
-    private Set<Position> calculateExpectedPositions(Orientation orientation, Board board) {
-        Set<Position> expectedPositions = new HashSet<>();
 
-        boolean rank = (orientation == Orientation.NORTH || orientation == Orientation.SOUTH) == isRank;
-        SpecialMovePosition pos = position.rotate(orientation);
-
-        int boardOffset = 0;
-        int dist = distance;
-        int off = offset;
-        boolean isBoardEven = (rank ? board.getHeight() : board.getWidth()) % 2 == 0;
-        boolean isReversed = false;
-        if (rank) {
-            distance = Math.min(distance, board.getHeight());
-            switch (pos) {
-                case CENTER:
-                    boardOffset = (int) Math.floor((board.getHeight() - 1) / 2.f);
-                    dist = boardOffset - offset;
-                    off = Math.max(dist - distance + offset, 0);
-                    isReversed = true;
-                    break;
-                case LAST:
-                    boardOffset = board.getWidth() - 1;
-                    dist = boardOffset - offset + 1;
-                    off = Math.max(dist - distance + offset, 0);
-                    isReversed = true;
-                    break;
-            }
-        } else {
-            distance = Math.min(distance, board.getWidth());
-            switch (pos) {
-                case CENTER:
-                    boardOffset = (int) Math.floor((board.getHeight() - 1) / 2.f);
-                    dist = boardOffset - offset;
-                    off = Math.max(dist - distance + offset, 0);
-                    isReversed = true;
-                    break;
-                case LAST:
-                    boardOffset = board.getHeight() - 1;
-                    dist = boardOffset - offset + 1;
-                    off = Math.max(dist - distance + offset, 0);
-                    isReversed = true;
-                    break;
-            }
-        }
-
-        fillPositions(board, expectedPositions, dist, off, rank, isReversed);
-
-        if (pos == SpecialMovePosition.CENTER) {
-            if (isBoardEven) {
-                boardOffset += 1;
-            }
-            fillPositions(board, expectedPositions, distance + boardOffset, offset + boardOffset, rank, false);
-        }
-
-        return expectedPositions;
-    }
-
-    private void fillPositions(Board board, Set<Position> expectedPositions, int distance, int offset, boolean rank, boolean isReversed) {
-        int length = this.distance - this.offset + 1;
-        if (isReversed) {
-            if (rank) {
-                int modulo = isRepeting ? length + spacing : board.getHeight();
-                for (int k = offset; k+length >= 0; k -= modulo) {
-                    int limit = Math.min(distance + k - offset, board.getHeight() - 1);
-                    for (int i = 0; i < board.getWidth(); i++) {
-                        for (int j = k; j <= limit; j++) {
-                            expectedPositions.add(new Position(i, j));
-                        }
-                    }
-                }
-            } else {
-                int modulo = isRepeting ? length + spacing : board.getWidth();
-                for (int k = offset; k+length >= 0; k -= modulo) {
-                    int limit = Math.min(distance + k - offset, board.getWidth() - 1);
-                    for (int i = 0; i < board.getHeight(); i++) {
-                        for (int j = k; j <= limit; j++) {
-                            expectedPositions.add(new Position(j, i));
-                        }
-                    }
-                }
-            }
-        } else {
-            if (rank) {
-                int modulo = isRepeting ? length + spacing : board.getHeight();
-                for (int k = offset; k < board.getHeight(); k += modulo) {
-                    int limit = Math.min(distance + k - offset, board.getHeight() - 1);
-                    for (int i = 0; i < board.getWidth(); i++) {
-                        for (int j = k; j <= limit; j++) {
-                            expectedPositions.add(new Position(i, j));
-                        }
-                    }
-                }
-            } else {
-                int modulo = isRepeting ? length + spacing : board.getWidth();
-                for (int k = offset; k < board.getWidth(); k += modulo) {
-                    int limit = Math.min(distance + k - offset, board.getWidth() - 1);
-                    for (int i = 0; i < board.getHeight(); i++) {
-                        for (int j = k; j <= limit; j++) {
-                            expectedPositions.add(new Position(j, i));
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

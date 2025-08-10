@@ -36,6 +36,40 @@ public class Board {
         setCell(position.getX(), position.getY(), value);
     }
 
+    public void setHead(Position position, String head) {
+        Space space = getCell(position.getX(), position.getY());
+        if (space != null) {
+            space.setHead(head);
+        } else {
+            throw new IllegalArgumentException("No space found at position: " + position);
+        }
+    }
+
+    public String getHead(Position position) {
+        Space space = getCell(position.getX(), position.getY());
+        if (space != null) {
+            return space.getHead();
+        }
+        return null;
+    }
+
+    public void setTail(Position position, String tail) {
+        Space space = getCell(position.getX(), position.getY());
+        if (space != null) {
+            space.setTail(tail);
+        } else {
+            throw new IllegalArgumentException("No space found at position: " + position);
+        }
+    }
+
+    public String getTail(Position position) {
+        Space space = getCell(position.getX(), position.getY());
+        if (space != null) {
+            return space.getTail();
+        }
+        return null;
+    }
+
     public Space[][] getGrid() {
         return grid;
     }

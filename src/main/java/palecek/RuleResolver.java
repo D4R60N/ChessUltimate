@@ -46,22 +46,40 @@ public class RuleResolver {
         Player playerObj = gameState.getPlayer();
         for (Rule rule : ruleList) {
             if (rule.isApplicable(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                if(toHasOccupant) {
-                    if(rule.canCapture(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                        if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                            rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                if (toHasOccupant) {
+                    if (rule.canCapture(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                        fromSpace.setUncommittedHead(null);
+                        toSpace.setUncommittedHead("p" + player + "." + pieceType);
+                        try {
+                            if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                                rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                            }
+                        } catch (IllegalArgumentException e) {
+                            fromSpace.rollback();
+                            toSpace.rollback();
+                            System.err.println(e.getMessage());
+                            return false;
                         }
-                        fromSpace.setHead(null);
-                        toSpace.setHead("p" + player + "." + pieceType);
+                        fromSpace.commit();
+                        toSpace.commit();
                         return true;
                     }
                 } else {
                     if (rule.canMove(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                        if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                            rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                        fromSpace.setUncommittedHead(null);
+                        toSpace.setUncommittedHead("p" + player + "." + pieceType);
+                        try {
+                            if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                                rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                            }
+                        } catch (IllegalArgumentException e) {
+                            fromSpace.rollback();
+                            toSpace.rollback();
+                            System.err.println(e.getMessage());
+                            return false;
                         }
-                        fromSpace.setHead(null);
-                        toSpace.setHead("p" + player + "." + pieceType);
+                        fromSpace.commit();
+                        toSpace.commit();
                         return true;
                     }
                 }

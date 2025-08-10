@@ -43,9 +43,9 @@ E - enemy
 
 A - ally
 
-TO - to space
+TO - to spaceType
 
-FROM - from space
+FROM - from spaceType
 
 # logic
 & - and

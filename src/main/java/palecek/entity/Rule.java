@@ -2,11 +2,13 @@ package palecek.entity;
 
 import palecek.Player;
 import palecek.action.Action;
+import palecek.action.ActionUtils;
 import palecek.utils.*;
 import palecek.utils.booleantree.BooleanTree;
 import palecek.utils.token.Parser;
 import palecek.utils.token.Tokenizer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,8 +70,13 @@ public class Rule {
     }
 
     public void setAction(String action) {
-        //todo
-        this.action = null;
+        String[] actions = action.split(Separators.SPACE_SEPARATOR);
+        this.action = new ArrayList<>(actions.length);
+        for (String act : actions) {
+            if (!act.isEmpty()) {
+                this.action.add(ActionUtils.parseAction(act));
+            }
+        }
     }
 
     public BooleanTree getActionCondition() {
@@ -138,7 +145,7 @@ public class Rule {
     }
 
     public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
-        if (!hasAction) {
+        if (!hasAction || action == null || action.isEmpty()) {
             return false;
         }
         if (actionCondition == null) {
@@ -155,14 +162,10 @@ public class Rule {
                 "player", player,
                 "turn", turn
         );
-        return captureCondition.evaluate(context);
+        return actionCondition.evaluate(context);
     }
 
     public void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
-        if (action == null || action.isEmpty()) {
-            return; // No action defined
-        }
-
         for (Action action : action) {
             action.performAction(from, to, orientation, board, player, turn, payload);
         }
