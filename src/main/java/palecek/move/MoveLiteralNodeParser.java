@@ -20,9 +20,11 @@ public class MoveLiteralNodeParser {
                 default -> new StringNode(value);
             };
         } else {
-            return containsSpecialChar(value)
-                    ? new SpecialMoveNode(value)
-                    : new MoveNode(value);
+            return switch (parts[0]) {
+                case "FROM", "TO" -> new MoveNode(value);
+                case "T" -> new TimerNode(value.substring(2));
+                default -> new SpecialMoveNode(value);
+            };
         }
     }
     private static boolean containsSpecialChar(String component) {

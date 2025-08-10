@@ -73,12 +73,13 @@ public class GameState {
 
     public void makeMove(String move) {
         String[] split = move.split(Separators.SPACE_SEPARATOR);
-        if (split.length != 2) {
+        if (split.length < 2 || split.length > 3) {
             throw new IllegalArgumentException("Invalid move format");
         }
         Position from = new Position(split[0]);
         Position to = new Position(split[1]);
-        if(ruleResolver.resolveMove(from, to, this)) {
+        String payload = split.length == 3 ? split[2] : null;
+        if(ruleResolver.resolveMove(from, to, payload, this)) {
             playerOnTurn = ((playerOnTurn+1) % numberOfPlayers);
             turnCount++;
         }

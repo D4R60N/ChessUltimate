@@ -1,12 +1,13 @@
 package palecek.entity;
 
 import palecek.Player;
+import palecek.action.Action;
 import palecek.utils.*;
 import palecek.utils.booleantree.BooleanTree;
 import palecek.utils.token.Parser;
 import palecek.utils.token.Tokenizer;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class Rule {
@@ -15,7 +16,7 @@ public class Rule {
     private boolean canCapture;
     private BooleanTree captureCondition;
     private boolean hasAction;
-    private String action;
+    private List<Action> action;
     private BooleanTree actionCondition;
 
     public static Tokenizer tokenizer = new Tokenizer();
@@ -35,7 +36,6 @@ public class Rule {
     public void setMoveCondition(String moveCondition) {
         Parser parser = new Parser(tokenizer.tokenize(moveCondition, true));
         this.moveCondition = moveCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
-        System.out.println("s");
     }
 
     public boolean isCanCapture() {
@@ -63,12 +63,13 @@ public class Rule {
         this.hasAction = hasAction;
     }
 
-    public String getAction() {
+    public List<Action> getAction() {
         return action;
     }
 
     public void setAction(String action) {
-        this.action = action;
+        //todo
+        this.action = null;
     }
 
     public BooleanTree getActionCondition() {
@@ -136,32 +137,34 @@ public class Rule {
         return captureCondition.evaluate(context);
     }
 
+    public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
+        if (!hasAction) {
+            return false;
+        }
+        if (actionCondition == null) {
+            if (!from.equals(to)) {
+                return false;
+            }
+            return true; // No actionCondition defined, so the action can be performed
+        }
+        Map<String, Object> context = Map.of(
+                "from", from,
+                "to", to,
+                "orientation", orientation,
+                "board", board,
+                "player", player,
+                "turn", turn
+        );
+        return captureCondition.evaluate(context);
+    }
 
+    public void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
+        if (action == null || action.isEmpty()) {
+            return; // No action defined
+        }
 
-    // Calculates the expected positions based on the move components.
-
-//
-//    private void trimMoves(List<MoveComponent> moveComponents) {
-//        LinkedList<MoveComponent> trimmedComponents = new LinkedList<>();
-//        for (int i = 0; i < moveComponents.size(); i++) {
-//            MoveComponent line1 = moveComponents.get(i);
-//            for (int j = i + 1; j < moveComponents.size(); j++) {
-//                MoveComponent line2 = moveComponents.get(j);
-//                // Check if the moveComponents are in opposite directions
-//                if (line1.getDirection().isOpposite(line2.getDirection())) {
-//                    // Check if the moveComponents overlap
-//                    if (line1.getFrom() == line2.getFrom()) {
-//                        // Check if the second line is remains a line after trimming
-//                        if (line2.getFrom() == line2.getTo()) {
-//                            trimmedComponents.add(line2);
-//                        } else {
-//                            line2.setFrom(line2.getFrom() + 1);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        // Remove moveComponents that are completely contained in other moveComponents
-//        moveComponents.removeAll(trimmedComponents);
-//    }
+        for (Action action : action) {
+            action.performAction(from, to, orientation, board, player, turn, payload);
+        }
+    }
 }

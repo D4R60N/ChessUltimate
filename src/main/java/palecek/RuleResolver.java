@@ -12,7 +12,7 @@ import java.util.Map;
 public class RuleResolver {
     private Map<String, List<Rule>> rules;
 
-    public boolean resolveMove(Position from, Position to, GameState gameState) {
+    public boolean resolveMove(Position from, Position to, String payload, GameState gameState) {
         Board board = gameState.getBoard();
         int playerOnTurn = gameState.getPlayerOnTurn();
         Space fromSpace = board.getFromPosition(from);
@@ -48,12 +48,18 @@ public class RuleResolver {
             if (rule.isApplicable(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
                 if(toHasOccupant) {
                     if(rule.canCapture(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                        if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                            rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                        }
                         fromSpace.setHead(null);
                         toSpace.setHead("p" + player + "." + pieceType);
                         return true;
                     }
                 } else {
                     if (rule.canMove(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                        if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                            rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                        }
                         fromSpace.setHead(null);
                         toSpace.setHead("p" + player + "." + pieceType);
                         return true;
