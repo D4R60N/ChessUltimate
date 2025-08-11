@@ -45,6 +45,31 @@ public class Space {
         this.uncommittedTail = "X";
     }
 
+    public String getPieceType() {
+        if (head == null || head.isEmpty() || head.length() < 2) {
+            return null;
+        }
+        String[] split = head.split("\\.");
+        if (split.length <= 1) {
+            return null;
+        }
+        return split[1].trim();
+    }
+
+    public String getPieceType(int player) {
+        if (head == null || head.isEmpty() || head.length() < 2) {
+            return null;
+        }
+        String[] split = head.split("\\.");
+        if (split.length <= 1) {
+            return null;
+        }
+        if (split[0].startsWith("p") && Integer.parseInt(split[0].substring(1)) == player) {
+            return split[1].trim();
+        }
+        return null;
+    }
+
     public String getTail() {
         return tail;
     }

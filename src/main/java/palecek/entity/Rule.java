@@ -21,7 +21,6 @@ public class Rule {
     private List<Action> action;
     private BooleanTree actionCondition;
 
-    public static Tokenizer tokenizer = new Tokenizer();
 
     public String getPiece() {
         return piece;
@@ -36,7 +35,7 @@ public class Rule {
     }
 
     public void setMoveCondition(String moveCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(moveCondition, true));
+        Parser parser = new Parser(Ideology.tokenizer.tokenize(moveCondition, true));
         this.moveCondition = moveCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
@@ -53,7 +52,7 @@ public class Rule {
     }
 
     public void setCaptureCondition(String captureCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(captureCondition, true));
+        Parser parser = new Parser(Ideology.tokenizer.tokenize(captureCondition, true));
         this.captureCondition = captureCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 
@@ -84,7 +83,7 @@ public class Rule {
     }
 
     public void setActionCondition(String actionCondition) {
-        Parser parser = new Parser(tokenizer.tokenize(actionCondition, true));
+        Parser parser = new Parser(Ideology.tokenizer.tokenize(actionCondition, true));
         this.actionCondition = actionCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 

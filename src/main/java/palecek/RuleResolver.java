@@ -1,16 +1,29 @@
 package palecek;
 
-import palecek.entity.Board;
-import palecek.entity.Position;
-import palecek.entity.Rule;
-import palecek.entity.Space;
+import palecek.entity.*;
 import palecek.utils.Separators;
+import palecek.utils.booleantree.BooleanTree;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class RuleResolver {
-    private Map<String, List<Rule>> rules;
+    private List<Ideology> ideologies = new ArrayList<>();
+
+    public boolean resolveEndCondition(int player, GameState gameState) {
+        Ideology ideology = ideologies.get(player);
+        if (ideology == null || ideology.getEndingCondition() == null) {
+            return false;
+        }
+        BooleanTree endingCondition = ideology.getEndingCondition();
+        Map<String, Object> context = Map.of(
+                "board", gameState.getBoard(),
+                "player", player,
+                "turn", gameState.getTurn()
+        );
+        return endingCondition.evaluate(context);
+    }
 
     public boolean resolveMove(Position from, Position to, String payload, GameState gameState) {
         Board board = gameState.getBoard();
@@ -39,7 +52,7 @@ public class RuleResolver {
         // appyng rules
         String pieceType = fromSpaceOccupant[1];
 
-        List<Rule> ruleList = rules.get(pieceType);
+        List<Rule> ruleList = ideologies.get(playerOnTurn).getRules().get(pieceType);
         if (ruleList == null) {
             return false;
         }
@@ -88,7 +101,7 @@ public class RuleResolver {
         return false;
     }
 
-    public void setRules(Map<String, List<Rule>> rules) {
-        this.rules = rules;
+    public void addRules(Ideology ideology) {
+        this.ideologies.add(ideology);
     }
 }

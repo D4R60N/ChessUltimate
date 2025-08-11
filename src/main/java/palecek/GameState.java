@@ -71,6 +71,20 @@ public class GameState {
         return turnCount;
     }
 
+    public boolean evaluateTurn() {
+        boolean result = false;
+        for (Player player : players) {
+            if (ruleResolver.resolveEndCondition( player.getNumber(), this)) {
+                System.out.println("Player " + player.getNumber() + " has lost the game!");
+                result = true;
+            }
+        }
+        if (!result && playerOnTurn == players.size() - 1) {
+            turnCount++;
+        }
+        return result;
+    }
+
     public void makeMove(String move) {
         String[] split = move.split(Separators.SPACE_SEPARATOR);
         if (split.length < 2 || split.length > 3) {
@@ -81,7 +95,6 @@ public class GameState {
         String payload = split.length == 3 ? split[2] : null;
         if(ruleResolver.resolveMove(from, to, payload, this)) {
             playerOnTurn = ((playerOnTurn+1) % numberOfPlayers);
-            turnCount++;
         }
     }
 }

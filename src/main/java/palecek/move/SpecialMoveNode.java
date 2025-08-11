@@ -1,6 +1,7 @@
 package palecek.move;
 
 import palecek.entity.Board;
+import palecek.entity.Ideology;
 import palecek.entity.Position;
 import palecek.entity.Rule;
 import palecek.utils.Operators;
@@ -60,7 +61,7 @@ public class SpecialMoveNode implements BooleanNode {
         this.distance = distance;
 
         String condition = separatedStrings[1];
-        Parser parser = new Parser(Rule.tokenizer.tokenize(condition, false), true);
+        Parser parser = new Parser(Ideology.tokenizer.tokenize(condition, false), Parser.ParserType.CONDITION);
         this.condition = condition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
     }
 

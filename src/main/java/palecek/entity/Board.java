@@ -87,6 +87,33 @@ public class Board {
         return null;
     }
 
+    public int countPieces() {
+        int count = 0;
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                Space space = grid[row][col];
+                if (space.getHead() != null && !space.getHead().isEmpty()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    public int countPiecesByType(String type, int player) {
+        int count = 0;
+        for (int row = 0; row < height; row++) {
+            for (int col = 0; col < width; col++) {
+                Space space = grid[row][col];
+                String pieceType = space.getPieceType(player);
+                if (pieceType != null && pieceType.equals(type)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     @Override
     public String toString() {
         int maxCellLength = 1;

@@ -1,6 +1,8 @@
 package palecek.utils.token;
 
+import palecek.endcondition.EndConditionLiteralNodeParser;
 import palecek.move.MoveLiteralNodeParser;
+import palecek.move.condition.ConditionLiteralNodeParser;
 import palecek.utils.booleantree.*;
 
 import java.util.List;
@@ -8,15 +10,15 @@ import java.util.List;
 public class Parser {
     private List<Token> tokens;
     private int pos = 0;
-    private boolean isCondition;
+    private ParserType parserType;
 
-    public Parser(List<Token> tokens, boolean isCondition) {
+    public Parser(List<Token> tokens, ParserType parserType) {
         this.tokens = tokens;
-        this.isCondition = isCondition;
+        this.parserType = parserType;
     }
 
     public Parser(List<Token> tokens) {
-        this(tokens, false);
+        this(tokens, ParserType.MOVE);
     }
 
     public BooleanNode parseExpression() {
@@ -61,7 +63,17 @@ public class Parser {
             return node;
         }
         if (match(TokenType.LITERAL)) {
-            return MoveLiteralNodeParser.parse(prev().value, isCondition);
+            switch (parserType) {
+                case END_CONDITION:
+                    return EndConditionLiteralNodeParser.parse(prev().value);
+                case CONDITION:
+                    return ConditionLiteralNodeParser.parse(prev().value);
+                case MOVE:
+                    return MoveLiteralNodeParser.parse(prev().value);
+                default:
+                    throw new RuntimeException("Unknown parser type: " + parserType);
+            }
+
         }
         throw new RuntimeException("Unexpected token: " + peek().value);
     }
@@ -84,5 +96,11 @@ public class Parser {
 
     private Token prev() {
         return tokens.get(pos - 1);
+    }
+
+    public enum ParserType {
+        END_CONDITION,
+        MOVE,
+        CONDITION
     }
 }

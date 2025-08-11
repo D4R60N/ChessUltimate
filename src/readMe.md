@@ -61,6 +61,11 @@ p - player followed by player number
 
 "-" - separator
 
+# end conditions
+NUM - number of pieces
+
+T - turn
+
 # example
 Ff+2:1.2 - Ff First file, +2 repetition with 2 spaces spacing, 1.2 from file with index 1 and 2.
 
@@ -73,3 +78,5 @@ T-2:3 - From second turn and than every 3 turns
 T-2 - Second turn
 
 2.3:b,2.3:r+ | 2.*:b+,2.3:l+
+
+NUM-king-0 | T->=2 - Has 0 kings or turn is greater than or equal to 2
