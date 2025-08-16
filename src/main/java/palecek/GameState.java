@@ -15,6 +15,7 @@ public class GameState {
     private RuleResolver ruleResolver;
     private List<Player> players;
     private int turnCount;
+    private Turn lastTurn;
 
     public GameState(int playerOnTurn, int numberOfPlayers, Board board, RuleResolver ruleResolver) {
         this.playerOnTurn = playerOnTurn;
@@ -22,6 +23,7 @@ public class GameState {
         this.board = board;
         this.ruleResolver = ruleResolver;
         this.turnCount = 0;
+        this.lastTurn = new Turn();
         if (numberOfPlayers <= 0) {
             throw new IllegalArgumentException("Number of players must be greater than 0");
         }
@@ -69,6 +71,17 @@ public class GameState {
 
     public int getTurn() {
         return turnCount;
+    }
+
+    public void setLastTurn(Turn lastTurn) {
+        if (lastTurn == null) {
+            throw new IllegalArgumentException("Last turn cannot be null");
+        }
+        this.lastTurn = lastTurn;
+    }
+
+    public Turn getLastTurn() {
+        return lastTurn;
     }
 
     public boolean evaluateTurn() {

@@ -7,4 +7,5 @@ public class Separators {
     public static final String SPACE_SEPARATOR = " "; //separates spaces in a string
     public static final String DIRECTION_SEPARATOR = ":"; //separates directions in a move rule
     public static final String SLASH_SEPARATOR = "/"; //separates orientations in a rule
+    public static final String SEMICOLON_SEPARATOR = ";"; //separates multiple rules in a string
 }

@@ -90,7 +90,7 @@ public class CreatePieceFromSpecialMoveIAction implements IAction {
             for (Position p : expectedPositions) {
                 Space space = board.getFromPosition(p);
                 if (space == null || space.getTail().equals("X")) {
-                    throw new IllegalArgumentException("Invalid position: " + p + " is not a valid space");
+                    continue;
                 }
                 if (p.equals(from) || p.equals(to)) {
                     space.setUncommittedHead("p" + player.getNumber() + "." + payload);
@@ -102,7 +102,7 @@ public class CreatePieceFromSpecialMoveIAction implements IAction {
             for (Position p : expectedPositions) {
                 Space space = board.getFromPosition(p);
                 if (space == null || space.getTail().equals("X")) {
-                    throw new IllegalArgumentException("Invalid position: " + p + " is not a valid space");
+                    continue;
                 }
                 if (p.equals(from) || p.equals(to)) {
                     space.setUncommittedHead("p" + player.getNumber() + "." + value);

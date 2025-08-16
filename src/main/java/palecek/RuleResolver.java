@@ -60,11 +60,11 @@ public class RuleResolver {
         for (Rule rule : ruleList) {
             if (rule.isApplicable(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
                 if (toHasOccupant) {
-                    if (rule.canCapture(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                    if (rule.canCapture(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), gameState.getLastTurn())) {
                         fromSpace.setUncommittedHead(null);
                         toSpace.setUncommittedHead("p" + player + "." + pieceType);
                         try {
-                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload, gameState.getLastTurn());
                         } catch (IllegalArgumentException e) {
                             fromSpace.rollback();
                             toSpace.rollback();
@@ -73,14 +73,19 @@ public class RuleResolver {
                         }
                         fromSpace.commit();
                         toSpace.commit();
+
+                        Turn lastTurn = new Turn(
+                                from, to, gameState.getPlayerOnTurn(), gameState.getTurn(), payload, pieceType
+                        );
+                        gameState.setLastTurn(lastTurn);
                         return true;
                     }
                 } else {
-                    if (rule.canMove(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
+                    if (rule.canMove(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), gameState.getLastTurn())) {
                         fromSpace.setUncommittedHead(null);
                         toSpace.setUncommittedHead("p" + player + "." + pieceType);
                         try {
-                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
+                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload, gameState.getLastTurn());
                         } catch (IllegalArgumentException e) {
                             fromSpace.rollback();
                             toSpace.rollback();
@@ -89,6 +94,11 @@ public class RuleResolver {
                         }
                         fromSpace.commit();
                         toSpace.commit();
+
+                        Turn lastTurn = new Turn(
+                                from, to, gameState.getPlayerOnTurn(), gameState.getTurn(), payload, pieceType
+                        );
+                        gameState.setLastTurn(lastTurn);
                         return true;
                     }
                 }

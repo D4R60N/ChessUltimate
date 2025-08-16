@@ -1,8 +1,8 @@
 8, 8
-p0.rook-O, p0.knight-O, p0.bishop-O, p0.queen-O, p0.king-O, p0.bishop-O, p0.knight-O, p0.rook-O
+p0.rook-O, p0.knight-O, p0.bishop-O, p0.king-O, p0.queen-O, p0.bishop-O, p0.knight-O, p0.rook-O
 p0.pawn-O, p1.pawn-O, p0.pawn-O, p0.pawn-O, p0.pawn-O, p0.pawn-O, p0.pawn-O, p0.pawn-O
 O, O, O, O, O, O, O, O
-O, O, O, O, O, O, O, O
+O, O, p0.bishop-O, p1.pawn-O, p1.pawn-O, p0.bishop-O, O, O
 O, O, O, O, O, O, O, O
 O, O, O, O, O, O, O, O
 p1.pawn-O, p1.pawn-O, p1.pawn-O, p1.pawn-O, p1.pawn-O, p1.pawn-O, p1.pawn-O, p1.pawn-O

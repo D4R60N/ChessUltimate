@@ -47,6 +47,10 @@ TO - to spaceType
 
 FROM - from spaceType
 
+P:"piece" - piece type
+
+S:"space" - space type
+
 # logic
 & - and
 
@@ -66,6 +70,11 @@ NUM - number of pieces
 
 T - turn
 
+# actions
+CREATE - create a unit
+
+REMOVE - remove a unit
+
 # example
 Ff+2:1.2 - Ff First file, +2 repetition with 2 spaces spacing, 1.2 from file with index 1 and 2.
 
@@ -80,3 +89,5 @@ T-2 - Second turn
 2.3:b,2.3:r+ | 2.*:b+,2.3:l+
 
 NUM-king-0 | T->=2 - Has 0 kings or turn is greater than or equal to 2
+
+LT-Ff+2:1.2;pawn - Evaluates if last turn pawn moved to first file with repetition with 2 spaces spacing and 2 from file with index 1 and 2.

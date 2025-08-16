@@ -2,10 +2,11 @@
   "name": "Monarchy",
   "description": "...",
   "endingCondition": "NUM-king-0",
+  "specialRules": [],
   "rules": [
     {
       "piece": "pawn",
-      "moveCondition": "FROM-1:f-TO | (Rf:1-FROM & FROM-2:f-TO)",
+      "moveCondition": "FROM-1:f-TO | (Rf:1-FROM & FROM-2:f-TO) |( LT-2:f;pawn & TO-1:b-LT & (FROM-1:f,1:r-TO | FROM-1:f,1:l-TO))",
       "canCapture": true,
       "captureCondition": "FROM-1:f,1:r-TO&E | FROM-1:f,1:l-TO&E",
       "hasAction": true,
@@ -16,7 +17,7 @@
         },
         {
           "action": "REMOVE-TO-1:b",
-          "actionCondition": "FROM-2:f-TO&E"
+          "actionCondition": "LT-2:f;pawn & TO-1:b-LT & (FROM-1:f,1:r-TO | FROM-1:f,1:l-TO)"
         }
       ]
     },
@@ -42,9 +43,25 @@
       "piece": "bishop",
       "moveCondition": "FROM-1:f+,1:l+-TO&!B* | FROM-1:f+,1:r+-TO&!B* | FROM-1:b+,1:l+-TO&!B* | FROM-1:b+,1:r+-TO&!B*",
       "canCapture": true,
-      "captureCondition": "FROM-1:f+,1:l+-TO&E&!B* | FROM-1:f+,1:r+-TO&E&!B* | FROM-1:b+,1:l+-TO&E&!B* | FROM-1:b+,1:r+-TO&E&!B*",
-      "hasAction": false,
+      "captureCondition": "FROM-1:f+,1:l+-TO&E&!B* | FROM-1:f+,1:r+-TO&E&!B* | FROM-1:b+,1:l+-TO&E&!B* | FROM-1:b+,1:r+-TO&E&!B* | (FROM-3:f-TO&A&P:bishop & FROM-1:f-E & FROM-2:f-E) | (FROM-3:l-TO&A&P:bishop & FROM-1:l-E & FROM-2:l-E) | (FROM-3:r-TO&A&P:bishop & FROM-1:r-E & FROM-2:r-E) | (FROM-3:b-TO&A&P:bishop & FROM-1:b-E & FROM-2:b-E)",
+      "hasAction": true,
       "actions": [
+        {
+          "action": "CREATE-FROM-bishop REMOVE-FROM-1.2:f",
+          "actionCondition": "FROM-3:f-TO&A&P:bishop & FROM-1:f-E & FROM-2:f-E"
+        },
+        {
+          "action": "CREATE-FROM-bishop REMOVE-FROM-1.2:l",
+          "actionCondition": "FROM-3:l-TO&A&P:bishop & FROM-1:l-E & FROM-2:l-E"
+        },
+        {
+          "action": "CREATE-FROM-bishop REMOVE-FROM-1.2:r",
+          "actionCondition": "FROM-3:r-TO&A&P:bishop & FROM-1:r-E & FROM-2:r-E"
+        },
+        {
+          "action": "CREATE-FROM-bishop REMOVE-FROM-1.2:b",
+          "actionCondition": "FROM-3:b-TO&A&P:bishop & FROM-1:b-E & FROM-2:b-E"
+        }
       ]
     },
     {
@@ -58,11 +75,19 @@
     },
     {
       "piece": "king",
-      "moveCondition": "FROM-1:f,1:l-TO | FROM-1:f,1:r-TO | FROM-1:b,1:l-TO | FROM-1:b,1:r-TO | FROM-1:f-TO | FROM-1:l-TO | FROM-1:r-TO | FROM-1:b-TO",
+      "moveCondition": "FROM-1:f,1:l-TO | FROM-1:f,1:r-TO | FROM-1:b,1:l-TO | FROM-1:b,1:r-TO | FROM-1:f-TO | FROM-1:l-TO | FROM-1:r-TO | FROM-1:b-TO | (FROM-2:l-TO & (FROM-4:l-P:rook&!B+ | FROM-3:l-P:rook&!B+) & Rf:0-FROM) | (FROM-2:r-TO & (FROM-3:r-P:rook&!B+ | FROM-4:r-P:rook&!B+) & Rf:0-FROM)",
       "canCapture": true,
       "captureCondition": "FROM-1:f,1:l-TO&E | FROM-1:f,1:r-TO&E | FROM-1:b,1:l-TO&E | FROM-1:b,1:r-TO&E | FROM-1:f-TO&E | FROM-1:l-TO&E | FROM-1:r-TO&E | FROM-1:b-TO&E",
-      "hasAction": false,
+      "hasAction": true,
       "actions": [
+        {
+            "action": "CREATE-TO-1:r-rook REMOVE-TO-1:l-rook REMOVE-TO-2:l",
+            "actionCondition": "FROM-2:l-TO & (FROM-4:l-P:rook&!B+ | FROM-3:l-P:rook&!B+) & Rf:0-FROM"
+            },
+            {
+            "action": "CREATE-TO-1:l-rook REMOVE-TO-1:r-rook REMOVE-TO-2:r",
+            "actionCondition": "FROM-2:r-TO & (FROM-3:r-P:rook&!B+ | FROM-4:r-P:rook&!B+) & Rf:0-FROM"
+        }
       ]
     }
   ]

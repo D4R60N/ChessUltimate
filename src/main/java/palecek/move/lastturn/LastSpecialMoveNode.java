@@ -1,29 +1,28 @@
-package palecek.action;
+package palecek.move.lastturn;
 
-import palecek.Player;
 import palecek.entity.Board;
 import palecek.entity.Position;
-import palecek.entity.Space;
-import palecek.move.SpecialMoveUtils;
+import palecek.move.*;
 import palecek.utils.Operators;
 import palecek.utils.Orientation;
 import palecek.utils.Separators;
 import palecek.utils.SpecialMovePosition;
+import palecek.utils.booleantree.BooleanNode;
 
+import java.util.List;
 import java.util.Set;
 
-public class RemovePieceFromSpecialMoveIAction implements IAction {
+public class LastSpecialMoveNode implements BooleanNode {
     private final boolean isRank;
     private final SpecialMovePosition position;
     private final int offset;
     private final int distance;
     private boolean isRepeting = false;
     private int spacing = 0;
-    private final String pieceType;
 
-    public RemovePieceFromSpecialMoveIAction(String value) {
+    public LastSpecialMoveNode(String value) {
         String[] parts = value.split(Separators.TYPE_SEPARATOR);
-        if (parts.length < 2 || parts.length > 3) {
+        if (parts.length != 3) {
             throw new IllegalArgumentException("Invalid action format: " + value);
         }
 
@@ -52,11 +51,6 @@ public class RemovePieceFromSpecialMoveIAction implements IAction {
             this.spacing = spacing;
         }
 
-        if (parts.length == 3) {
-            this.pieceType = parts[2];
-        } else {
-            this.pieceType = null; // No specific piece type, can be null
-        }
 
         this.isRank = query.startsWith("R");
         this.position = SpecialMovePosition.fromString(query.substring(1, 2));
@@ -65,23 +59,13 @@ public class RemovePieceFromSpecialMoveIAction implements IAction {
     }
 
     @Override
-    public void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
-        Set<Position> expectedPositions = SpecialMoveUtils.calculateExpectedPositions(orientation, board, distance, offset, isRank, isRepeting, spacing, position);
+    public boolean evaluate(java.util.Map<String, Object> context) {
+        Position to = (Position) context.get("to");
+        Orientation orientation = (Orientation) context.get("orientation");
+        Board board = (Board) context.get("board");
+        Set<Position> expectedPositions = SpecialMoveUtils.calculateExpectedPositions(
+                orientation, board, distance, offset, isRank, isRepeting, spacing, position);
 
-        for (Position p : expectedPositions) {
-            Space space = board.getFromPosition(p);
-            if (space == null || space.getTail().equals("X")) {
-                continue;
-            }
-            String piece = space.getPieceType();
-            if(pieceType != null && piece != null && !piece.equals(pieceType)) {
-                continue;
-            }
-            if (p.equals(from) || p.equals(to)) {
-                space.setUncommittedHead(null);
-            } else {
-                space.setHead(null);
-            }
-        }
+        return expectedPositions.contains(to);
     }
 }

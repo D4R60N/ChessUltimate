@@ -64,6 +64,7 @@ public class MoveNode implements BooleanNode {
         conditionContext.put("positions", expectedPositions);
         conditionContext.put("player", context.get("player"));
         conditionContext.put("turn", context.get("turn"));
+        conditionContext.put("lastTurn", context.get("lastTurn"));
 
         return condition.evaluate(conditionContext);
     }

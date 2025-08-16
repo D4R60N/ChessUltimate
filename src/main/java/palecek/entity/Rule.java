@@ -1,6 +1,7 @@
 package palecek.entity;
 
 import palecek.Player;
+import palecek.Turn;
 import palecek.action.Action;
 import palecek.action.IAction;
 import palecek.action.ActionUtils;
@@ -92,7 +93,7 @@ public class Rule {
         return true; //todo
     }
 
-    public boolean canMove(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
+    public boolean canMove(Position from, Position to, Orientation orientation, Board board, Player player, int turn, Turn lastTurn) {
         if (moveCondition == null) {
             if (!from.equals(to)) {
                 return false;
@@ -105,12 +106,13 @@ public class Rule {
                 "orientation", orientation,
                 "board", board,
                 "player", player,
-                "turn", turn
+                "turn", turn,
+                "lastTurn", lastTurn
         );
         return moveCondition.evaluate(context);
     }
 
-    public boolean canCapture(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
+    public boolean canCapture(Position from, Position to, Orientation orientation, Board board, Player player, int turn, Turn lastTurn) {
         if (!canCapture) {
             return false;
         }
@@ -126,12 +128,13 @@ public class Rule {
                 "orientation", orientation,
                 "board", board,
                 "player", player,
-                "turn", turn
+                "turn", turn,
+                "lastTurn", lastTurn
         );
         return captureCondition.evaluate(context);
     }
 
-    public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
+    public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload, Turn lastTurn) {
         boolean result = false;
         for (Action a : actions) {
             List<IAction> action = a.getAction();
@@ -152,7 +155,8 @@ public class Rule {
                     "orientation", orientation,
                     "board", board,
                     "player", player,
-                    "turn", turn
+                    "turn", turn,
+                    "lastTurn", lastTurn
             );
             if (actionCondition.evaluate(context)) {
                 performAction(from, to, orientation, board, player, turn, payload, action);
