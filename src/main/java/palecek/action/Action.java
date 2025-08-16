@@ -1,23 +1,37 @@
 package palecek.action;
 
-import palecek.Player;
-import palecek.entity.Board;
-import palecek.entity.Position;
-import palecek.utils.Orientation;
+import palecek.entity.Ideology;
+import palecek.utils.Separators;
+import palecek.utils.booleantree.BooleanTree;
+import palecek.utils.token.Parser;
 
-public interface Action {
+import java.util.ArrayList;
+import java.util.List;
 
-    /**
-     * Performs the action based on the given parameters. Returns true if action overrides the turn,
-     * @param from
-     * @param to
-     * @param orientation
-     * @param board
-     * @param player
-     * @param turn
-     * @param payload
-     * @return
-     */
-    void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload);
+public class Action {
+    private List<IAction> action;
+    private BooleanTree actionCondition;
 
+    public List<IAction> getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        String[] actions = action.split(Separators.SPACE_SEPARATOR);
+        this.action = new ArrayList<>(actions.length);
+        for (String act : actions) {
+            if (!act.isEmpty()) {
+                this.action.add(ActionUtils.parseAction(act));
+            }
+        }
+    }
+
+    public BooleanTree getActionCondition() {
+        return actionCondition;
+    }
+
+    public void setActionCondition(String actionCondition) {
+        Parser parser = new Parser(Ideology.tokenizer.tokenize(actionCondition, true));
+        this.actionCondition = actionCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
+    }
 }

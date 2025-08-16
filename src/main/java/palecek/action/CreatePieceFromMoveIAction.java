@@ -13,14 +13,14 @@ import palecek.utils.SpaceType;
 import java.util.List;
 import java.util.Set;
 
-public class CreatePieceFromMoveAction implements Action {
+public class CreatePieceFromMoveIAction implements IAction {
     private final SpaceType origin;
     private final List<MoveComponent> moveComponents;
     private final String value;
     private Set<String> payloads;
 
 
-    public CreatePieceFromMoveAction(String value) {
+    public CreatePieceFromMoveIAction(String value) {
         String[] parts = value.split(Separators.TYPE_SEPARATOR);
         if (parts.length < 2 || parts.length > 4) {
             throw new IllegalArgumentException("Invalid action format: " + value);

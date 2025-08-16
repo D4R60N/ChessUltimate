@@ -2,11 +2,11 @@ package palecek.entity;
 
 import palecek.Player;
 import palecek.action.Action;
+import palecek.action.IAction;
 import palecek.action.ActionUtils;
 import palecek.utils.*;
 import palecek.utils.booleantree.BooleanTree;
 import palecek.utils.token.Parser;
-import palecek.utils.token.Tokenizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,7 @@ public class Rule {
     private boolean canCapture;
     private BooleanTree captureCondition;
     private boolean hasAction;
-    private List<Action> action;
-    private BooleanTree actionCondition;
+    private List<Action> actions;
 
 
     public String getPiece() {
@@ -64,28 +63,19 @@ public class Rule {
         this.hasAction = hasAction;
     }
 
-    public List<Action> getAction() {
-        return action;
+    public List<Action> getActions() {
+        return actions;
     }
 
-    public void setAction(String action) {
-        String[] actions = action.split(Separators.SPACE_SEPARATOR);
-        this.action = new ArrayList<>(actions.length);
-        for (String act : actions) {
-            if (!act.isEmpty()) {
-                this.action.add(ActionUtils.parseAction(act));
+    public void setActions(Action[] actions) {
+        this.actions = new ArrayList<>(actions.length);
+        for (Action action : actions) {
+            if (action != null) {
+                this.actions.add(action);
             }
         }
     }
 
-    public BooleanTree getActionCondition() {
-        return actionCondition;
-    }
-
-    public void setActionCondition(String actionCondition) {
-        Parser parser = new Parser(Ideology.tokenizer.tokenize(actionCondition, true));
-        this.actionCondition = actionCondition.isEmpty() ? null : new BooleanTree(parser.parseExpression());
-    }
 
     @Override
     public String toString() {
@@ -95,8 +85,6 @@ public class Rule {
                 ", canCapture=" + canCapture +
                 ", captureCondition='" + captureCondition + '\'' +
                 ", hasAction=" + hasAction +
-                ", action='" + action + '\'' +
-                ", actionCondition='" + actionCondition + '\'' +
                 '}';
     }
 
@@ -143,29 +131,39 @@ public class Rule {
         return captureCondition.evaluate(context);
     }
 
-    public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn) {
-        if (!hasAction || action == null || action.isEmpty()) {
-            return false;
-        }
-        if (actionCondition == null) {
-            if (!from.equals(to)) {
+    public boolean canSpecial(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
+        boolean result = false;
+        for (Action a : actions) {
+            List<IAction> action = a.getAction();
+            BooleanTree actionCondition = a.getActionCondition();
+
+            if (!hasAction || action == null || action.isEmpty()) {
                 return false;
             }
-            return true; // No actionCondition defined, so the action can be performed
+            if (actionCondition == null) {
+                if (!from.equals(to)) {
+                    return false;
+                }
+                return true; // No actionCondition defined, so the action can be performed
+            }
+            Map<String, Object> context = Map.of(
+                    "from", from,
+                    "to", to,
+                    "orientation", orientation,
+                    "board", board,
+                    "player", player,
+                    "turn", turn
+            );
+            if (actionCondition.evaluate(context)) {
+                performAction(from, to, orientation, board, player, turn, payload, action);
+                result = true; // Action was performed successfully
+            }
         }
-        Map<String, Object> context = Map.of(
-                "from", from,
-                "to", to,
-                "orientation", orientation,
-                "board", board,
-                "player", player,
-                "turn", turn
-        );
-        return actionCondition.evaluate(context);
+        return result;
     }
 
-    public void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload) {
-        for (Action action : action) {
+    public void performAction(Position from, Position to, Orientation orientation, Board board, Player player, int turn, String payload, List<IAction> iAction) {
+        for (IAction action : iAction) {
             action.performAction(from, to, orientation, board, player, turn, payload);
         }
     }

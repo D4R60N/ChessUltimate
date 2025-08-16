@@ -64,9 +64,7 @@ public class RuleResolver {
                         fromSpace.setUncommittedHead(null);
                         toSpace.setUncommittedHead("p" + player + "." + pieceType);
                         try {
-                            if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                                rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
-                            }
+                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
                         } catch (IllegalArgumentException e) {
                             fromSpace.rollback();
                             toSpace.rollback();
@@ -82,9 +80,7 @@ public class RuleResolver {
                         fromSpace.setUncommittedHead(null);
                         toSpace.setUncommittedHead("p" + player + "." + pieceType);
                         try {
-                            if (rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn())) {
-                                rule.performAction(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
-                            }
+                            rule.canSpecial(from, to, playerObj.getOrientation(), board, gameState.getPlayer(), gameState.getTurn(), payload);
                         } catch (IllegalArgumentException e) {
                             fromSpace.rollback();
                             toSpace.rollback();

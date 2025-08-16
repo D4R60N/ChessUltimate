@@ -9,8 +9,16 @@
       "canCapture": true,
       "captureCondition": "FROM-1:f,1:r-TO&E | FROM-1:f,1:l-TO&E",
       "hasAction": true,
-      "action": "CREATE-TO-P:queen,rook,bishop,knight",
-      "actionCondition": "Rl:0-TO"
+      "actions": [
+        {
+          "action": "CREATE-TO-P:queen,rook,bishop,knight",
+          "actionCondition": "Rl:0-TO"
+        },
+        {
+          "action": "REMOVE-TO-1:b",
+          "actionCondition": "FROM-2:f-TO&E"
+        }
+      ]
     },
     {
       "piece": "rook",
@@ -18,8 +26,8 @@
       "canCapture": true,
       "captureCondition": "FROM-1:f+-TO&E&!B+ | FROM-1:l+-TO&E&!B+ | FROM-1:r+-TO&E&!B+ | FROM-1:b+-TO&E&!B+",
       "hasAction": false,
-      "action": "",
-      "actionCondition": ""
+      "actions": [
+      ]
     },
     {
       "piece": "knight",
@@ -27,8 +35,8 @@
       "canCapture": true,
       "captureCondition": "FROM-2:f,1:l-TO&E | FROM-2:f,1:r-TO&E | FROM-2:b,1:l-TO&E | FROM-2:b,1:r-TO&E | FROM-2:l,1:f-TO&E | FROM-2:r,1:f-TO&E | FROM-2:l,1:b-TO&E | FROM-2:r,1:b-TO&E",
       "hasAction": false,
-      "action": "",
-      "actionCondition": ""
+      "actions": [
+      ]
     },
     {
       "piece": "bishop",
@@ -36,8 +44,8 @@
       "canCapture": true,
       "captureCondition": "FROM-1:f+,1:l+-TO&E&!B* | FROM-1:f+,1:r+-TO&E&!B* | FROM-1:b+,1:l+-TO&E&!B* | FROM-1:b+,1:r+-TO&E&!B*",
       "hasAction": false,
-      "action": "",
-      "actionCondition": ""
+      "actions": [
+      ]
     },
     {
       "piece": "queen",
@@ -45,8 +53,8 @@
       "canCapture": true,
       "captureCondition": "FROM-1:f+,1:l+-TO&E&!B* | FROM-1:f+,1:r+-TO&E&!B* | FROM-1:b+,1:l+-TO&E&!B* | FROM-1:b+,1:r+-TO&E&!B* | FROM-1:f+-TO&E&!B+ | FROM-1:l+-TO&E&!B+ | FROM-1:r+-TO&E&!B+ | FROM-1:b+-TO&E&!B+",
       "hasAction": false,
-      "action": "",
-      "actionCondition": ""
+      "actions": [
+      ]
     },
     {
       "piece": "king",
@@ -54,8 +62,8 @@
       "canCapture": true,
       "captureCondition": "FROM-1:f,1:l-TO&E | FROM-1:f,1:r-TO&E | FROM-1:b,1:l-TO&E | FROM-1:b,1:r-TO&E | FROM-1:f-TO&E | FROM-1:l-TO&E | FROM-1:r-TO&E | FROM-1:b-TO&E",
       "hasAction": false,
-      "action": "",
-      "actionCondition": ""
+      "actions": [
+      ]
     }
   ]
 }

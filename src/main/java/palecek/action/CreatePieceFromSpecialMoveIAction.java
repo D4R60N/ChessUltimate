@@ -4,15 +4,12 @@ import palecek.Player;
 import palecek.entity.Board;
 import palecek.entity.Position;
 import palecek.entity.Space;
-import palecek.move.MoveComponent;
-import palecek.move.MoveUtils;
 import palecek.move.SpecialMoveUtils;
 import palecek.utils.*;
 
-import java.util.List;
 import java.util.Set;
 
-public class CreatePieceFromSpecialMoveAction implements Action {
+public class CreatePieceFromSpecialMoveIAction implements IAction {
     private final boolean isRank;
     private final SpecialMovePosition position;
     private final int offset;
@@ -23,7 +20,7 @@ public class CreatePieceFromSpecialMoveAction implements Action {
     private Set<String> payloads;
 
 
-    public CreatePieceFromSpecialMoveAction(String value) {
+    public CreatePieceFromSpecialMoveIAction(String value) {
         String[] parts = value.split(Separators.TYPE_SEPARATOR);
         if (parts.length != 3) {
             throw new IllegalArgumentException("Invalid action format: " + value);
